@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace KutuphaneOdunc.Tests.Data;
 
 // wwwroot/data/books.json dosyasının ödevdeki kurallara uyduğunu kontrol eder.
-// Dosya test projesine TestData/books.json olarak kopyalanır (bkz. KutuphaneOdunc.Tests.csproj).
+// books.json ve kapak görselleri test çıktısına TestData/ altına kopyalanır (bkz. KutuphaneOdunc.Tests.csproj).
 public class BooksJsonTests
 {
     private static readonly string BooksPath =
@@ -90,5 +90,25 @@ public class BooksJsonTests
     {
         // K3'ün (pasif Ödünç Al butonu) arayüzde denenebilmesi için.
         Assert.Contains(LoadBooks(), b => b.GetProperty("availableCopies").GetInt32() == 0);
+    }
+
+    [Fact]
+    public void Her_kitabin_kapak_dosyasi_olmali()
+    {
+        foreach (var book in LoadBooks())
+        {
+            var id = book.GetProperty("id").GetString();
+            var coverUrl = book.GetProperty("coverUrl").GetString();
+
+            Assert.False(string.IsNullOrWhiteSpace(coverUrl), $"{id}: coverUrl boş.");
+            Assert.True(File.Exists(Path.Combine(AppContext.BaseDirectory, "TestData", coverUrl!)),
+                $"{id}: {coverUrl} dosyası bulunamadı.");
+        }
+    }
+
+    [Fact]
+    public void Varsayilan_kapak_dosyasi_olmali()
+    {
+        Assert.True(File.Exists(Path.Combine(AppContext.BaseDirectory, "TestData", "images", "default.svg")));
     }
 }
