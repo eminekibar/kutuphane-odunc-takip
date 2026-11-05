@@ -26,4 +26,8 @@
     <ProjectReference Include="..\KutuphaneOdunc.Models\KutuphaneOdunc.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\KutuphaneOdunc\wwwroot\data\books.json" Link="TestData\books.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
