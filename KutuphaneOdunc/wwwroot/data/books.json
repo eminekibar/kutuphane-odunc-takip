@@ -1,0 +1,200 @@
+[
+  {
+    "id": "B001",
+    "title": "Yazılım Tasarımına Giriş",
+    "author": "Ayşe Yılmaz",
+    "category": "Bilgisayar Bilimleri",
+    "publisher": "Örnek Yayınları",
+    "publicationYear": 2022,
+    "coverUrl": "images/B001.svg",
+    "totalCopies": 5,
+    "availableCopies": 3
+  },
+  {
+    "id": "B002",
+    "title": "Araştırma Yöntemlerine Giriş",
+    "author": "Murat Demir",
+    "category": "Bilim",
+    "publisher": "Akademi Kitap",
+    "publicationYear": 2020,
+    "coverUrl": "images/B002.svg",
+    "totalCopies": 2,
+    "availableCopies": 0
+  },
+  {
+    "id": "B003",
+    "title": "Veri Yapıları ve Algoritmalar",
+    "author": "Kerem Aydın",
+    "category": "Bilgisayar Bilimleri",
+    "publisher": "Bilgi Teknik Yayınları",
+    "publicationYear": 2021,
+    "coverUrl": "images/B003.svg",
+    "totalCopies": 4,
+    "availableCopies": 4
+  },
+  {
+    "id": "B004",
+    "title": "Web Uygulamalarında Bileşen Mimarisi",
+    "author": "Ayşe Yılmaz",
+    "category": "Bilgisayar Bilimleri",
+    "publisher": "Örnek Yayınları",
+    "publicationYear": 2024,
+    "coverUrl": "images/B004.svg",
+    "totalCopies": 3,
+    "availableCopies": 2
+  },
+  {
+    "id": "B005",
+    "title": "Ağ Güvenliğinin Temelleri",
+    "author": "Şule Erdoğan",
+    "category": "Bilgisayar Bilimleri",
+    "publisher": "Kod Kitap",
+    "publicationYear": 2023,
+    "coverUrl": "images/B005.svg",
+    "totalCopies": 1,
+    "availableCopies": 1
+  },
+  {
+    "id": "B006",
+    "title": "Evrenin Sessiz Dili: Kuantum Fiziğine Yolculuk",
+    "author": "İlker Özgür",
+    "category": "Bilim",
+    "publisher": "Gökkuşağı Bilim",
+    "publicationYear": 2019,
+    "coverUrl": "images/B006.svg",
+    "totalCopies": 3,
+    "availableCopies": 1
+  },
+  {
+    "id": "B007",
+    "title": "Hücreden Organizmaya",
+    "author": "Gülşen Çağlar",
+    "category": "Bilim",
+    "publisher": "Akademi Kitap",
+    "publicationYear": 2018,
+    "coverUrl": "images/B007.svg",
+    "totalCopies": 2,
+    "availableCopies": 2
+  },
+  {
+    "id": "B008",
+    "title": "İklim ve Okyanuslar",
+    "author": "Murat Demir",
+    "category": "Bilim",
+    "publisher": "Deniz Yayınevi",
+    "publicationYear": 2023,
+    "coverUrl": "images/B008.svg",
+    "totalCopies": 4,
+    "availableCopies": 0
+  },
+  {
+    "id": "B009",
+    "title": "Rüzgârın Getirdiği Mektuplar",
+    "author": "Selin Akgündüz",
+    "category": "Edebiyat",
+    "publisher": "Kırlangıç Yayınları",
+    "publicationYear": 2017,
+    "coverUrl": "images/B009.svg",
+    "totalCopies": 5,
+    "availableCopies": 4
+  },
+  {
+    "id": "B010",
+    "title": "İstanbul'da Son Vapur",
+    "author": "Oğuz Kayacan",
+    "category": "Edebiyat",
+    "publisher": "Lale Kitap",
+    "publicationYear": 2021,
+    "coverUrl": "images/B010.svg",
+    "totalCopies": 3,
+    "availableCopies": 3
+  },
+  {
+    "id": "B011",
+    "title": "Kış Bahçesinde Unutulan Şarkılar ve Uzun Bir Yolculuğun Hikâyesi",
+    "author": "Defne Işıkhan",
+    "category": "Edebiyat",
+    "publisher": "Kırlangıç Yayınları",
+    "publicationYear": 2022,
+    "coverUrl": "images/B011.svg",
+    "totalCopies": 2,
+    "availableCopies": 1
+  },
+  {
+    "id": "B012",
+    "title": "Sessiz Kasaba",
+    "author": "Oğuz Kayacan",
+    "category": "Edebiyat",
+    "publisher": "Lale Kitap",
+    "publicationYear": 2016,
+    "coverUrl": "images/B012.svg",
+    "totalCopies": 1,
+    "availableCopies": 0
+  },
+  {
+    "id": "B013",
+    "title": "Anadolu'da İpek Yolu Kervansarayları",
+    "author": "Hakan Tunçbilek",
+    "category": "Tarih",
+    "publisher": "Kervan Yayınevi",
+    "publicationYear": 2020,
+    "coverUrl": "images/B013.svg",
+    "totalCopies": 2,
+    "availableCopies": 1
+  },
+  {
+    "id": "B014",
+    "title": "Osmanlı'da Gündelik Hayat",
+    "author": "Nur Ekinci",
+    "category": "Tarih",
+    "publisher": "Kervan Yayınevi",
+    "publicationYear": 2019,
+    "coverUrl": "images/B014.svg",
+    "totalCopies": 3,
+    "availableCopies": 2
+  },
+  {
+    "id": "B015",
+    "title": "Antik Kentlerin İzinde",
+    "author": "Hakan Tunçbilek",
+    "category": "Tarih",
+    "publisher": "Kervan Yayınevi",
+    "publicationYear": 2018,
+    "coverUrl": "images/B015.svg",
+    "totalCopies": 4,
+    "availableCopies": 3
+  },
+  {
+    "id": "B016",
+    "title": "Düşünmenin Kısa Tarihi",
+    "author": "Cemre Uğurlu",
+    "category": "Felsefe",
+    "publisher": "Düşünce Evi Yayınları",
+    "publicationYear": 2021,
+    "coverUrl": "images/B016.svg",
+    "totalCopies": 4,
+    "availableCopies": 3
+  },
+  {
+    "id": "B017",
+    "title": "Etik Üzerine Sorular",
+    "author": "Barış Öztürk",
+    "category": "Felsefe",
+    "publisher": "Düşünce Evi Yayınları",
+    "publicationYear": 2019,
+    "coverUrl": "images/B017.svg",
+    "totalCopies": 3,
+    "availableCopies": 2
+  },
+  {
+    "id": "B018",
+    "title": "Mantığa Giriş",
+    "author": "Cemre Uğurlu",
+    "category": "Felsefe",
+    "publisher": "Akademi Kitap",
+    "publicationYear": 2022,
+    "coverUrl": "images/B018.svg",
+    "totalCopies": 2,
+    "availableCopies": 1
+  }
+]
