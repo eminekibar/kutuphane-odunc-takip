@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KutuphaneOdunc.Models", "Ku
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KutuphaneOdunc.Tests", "KutuphaneOdunc.Tests\KutuphaneOdunc.Tests.csproj", "{75F24795-13E7-43A8-9528-4AAD98AA56DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KutuphaneOdunc.E2ETests", "KutuphaneOdunc.E2ETests\KutuphaneOdunc.E2ETests.csproj", "{F5EE518A-F87A-4309-8407-5A9A58448128}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{75F24795-13E7-43A8-9528-4AAD98AA56DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75F24795-13E7-43A8-9528-4AAD98AA56DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75F24795-13E7-43A8-9528-4AAD98AA56DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5EE518A-F87A-4309-8407-5A9A58448128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5EE518A-F87A-4309-8407-5A9A58448128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5EE518A-F87A-4309-8407-5A9A58448128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5EE518A-F87A-4309-8407-5A9A58448128}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
