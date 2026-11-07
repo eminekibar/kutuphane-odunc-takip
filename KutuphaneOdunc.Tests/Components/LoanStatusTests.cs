@@ -1,11 +1,19 @@
 using Bunit;
 using KutuphaneOdunc.Components;
 using KutuphaneOdunc.Models;
+using KutuphaneOdunc.Tests.Fakes;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KutuphaneOdunc.Tests.Components;
 
 public class LoanStatusTests : BunitContext
 {
+    // "Takvime ekle" (#47) dosyanın oluşturulma anını TimeProvider'dan alıyor.
+    public LoanStatusTests()
+    {
+        Services.AddSingleton<TimeProvider>(new FixedTimeProvider(new DateTime(2026, 11, 10, 9, 30, 0)));
+    }
+
     // Ödünç 1 Kasım, son teslim 15 Kasım.
     private static readonly DateTime BorrowDate = new(2026, 11, 1);
     private static readonly DateTime DueDate = new(2026, 11, 15);
@@ -231,5 +239,55 @@ public class LoanStatusTests : BunitContext
         Assert.Equal("loan-LIB-2026-101", cut.Find("h3").Id);
         Assert.Equal("loan-LIB-2026-101", cut.Find(".extend-button").GetAttribute("aria-describedby"));
         Assert.Equal("loan-LIB-2026-101", cut.Find(".return-button").GetAttribute("aria-describedby"));
+    }
+
+    // Takvime ekle (#47)
+
+    [Fact]
+    public void Iade_edilmemis_kayitta_Takvime_ekle_butonu_olmali()
+    {
+        Assert.NotNull(Ciz(OrnekKayit(), AktifGun).Find(".calendar-button"));
+        Assert.NotNull(Ciz(OrnekKayit(), GecikmisGun).Find(".calendar-button"));
+    }
+
+    [Fact]
+    public void Iade_edilmis_kayitta_Takvime_ekle_butonu_olmamali()
+    {
+        var cut = Ciz(OrnekKayit(iadeTarihi: new DateTime(2026, 11, 8)), AktifGun);
+
+        Assert.Empty(cut.FindAll(".calendar-button"));
+    }
+
+    [Fact]
+    public void Takvime_ekle_dosyayi_odunc_koduyla_indirmeli()
+    {
+        JSInterop.SetupVoid("kutuphane.downloadFile", _ => true).SetVoidResult();
+        var cut = Ciz(OrnekKayit(), AktifGun);
+
+        cut.Find(".calendar-button").Click();
+
+        var cagri = JSInterop.VerifyInvoke("kutuphane.downloadFile");
+        Assert.Equal("LIB-2026-101.ics", cagri.Arguments[0]);
+        var icerik = (string)cagri.Arguments[1]!;
+        Assert.Contains("DTSTART;VALUE=DATE:20261115", icerik);
+        Assert.Contains("SUMMARY:Kitap iadesi: Yazılım Tasarımına Giriş", icerik);
+        Assert.Equal("text/calendar;charset=utf-8", cagri.Arguments[2]);
+    }
+
+    [Fact]
+    public void Sure_uzatildiktan_sonra_yeni_teslim_tarihiyle_indirilmeli()
+    {
+        JSInterop.SetupVoid("kutuphane.downloadFile", _ => true).SetVoidResult();
+        var kayit = OrnekKayit();
+        var cut = Ciz(kayit, AktifGun);
+
+        // Sayfa uzatmadan sonra kartı güncel kayıtla yeniden çiziyor (#16).
+        kayit.DueDate = DueDate.AddDays(7);
+        kayit.IsExtended = true;
+        cut.Render();
+        cut.Find(".calendar-button").Click();
+
+        var icerik = (string)JSInterop.VerifyInvoke("kutuphane.downloadFile").Arguments[1]!;
+        Assert.Contains("DTSTART;VALUE=DATE:20261122", icerik);
     }
 }

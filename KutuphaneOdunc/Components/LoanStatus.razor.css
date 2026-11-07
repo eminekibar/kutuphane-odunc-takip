@@ -130,8 +130,10 @@
     }
 
 @media (min-width: 576px) {
+    /* Üç buton dar kartta tek satıra sığmazsa alt satıra geçsin. */
     .actions {
         flex-direction: row;
+        flex-wrap: wrap;
     }
 
         .actions .btn {
