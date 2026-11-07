@@ -4,11 +4,9 @@ using KutuphaneOdunc.Tests.Fakes;
 
 namespace KutuphaneOdunc.Tests.Services;
 
-// LibraryState'in kural testleri. Metotlar #8'de yazılacak, o zamana kadar testler kapalı.
+// LibraryState'in kural testleri (K4, K6–K9, K11).
 public class LibraryStateTests
 {
-    private const string Skip = "#8 ile açılacak";
-
     private static readonly DateTime Today = new(2026, 11, 10, 10, 30, 0);
 
     private static readonly BorrowFormModel Form = new() { FullName = "Ayşe Yılmaz", Email = "ayse@ornek.com" };
@@ -35,7 +33,7 @@ public class LibraryStateTests
 
     // K4
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Aktif_kaydi_olan_kitap_tekrar_odunc_alinamaz()
     {
         var state = await CreateStateAsync();
@@ -48,7 +46,7 @@ public class LibraryStateTests
         Assert.Equal(1, BookById(state, "B001").AvailableCopies);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task HasActiveLoan_iade_edilmemis_kayit_varsa_true_olmali()
     {
         var state = await CreateStateAsync();
@@ -63,7 +61,7 @@ public class LibraryStateTests
 
     // K6
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Ilk_odunc_kodu_LIB_yil_101_olmali()
     {
         var state = await CreateStateAsync();
@@ -74,7 +72,7 @@ public class LibraryStateTests
         Assert.Equal("LIB-2026-101", result.Loan!.Id);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Sonraki_kod_en_buyuk_siranin_bir_fazlasi_olmali()
     {
         var storage = new FakeLocalStorage();
@@ -90,7 +88,7 @@ public class LibraryStateTests
         Assert.Equal("LIB-2026-106", result.Loan!.Id);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Odunc_tarihi_bugun_teslim_tarihi_14_gun_sonra_olmali()
     {
         var state = await CreateStateAsync();
@@ -103,7 +101,7 @@ public class LibraryStateTests
         Assert.False(loan.IsExtended);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Kayit_formdaki_ad_ve_e_posta_ile_olusmali()
     {
         var state = await CreateStateAsync();
@@ -115,7 +113,7 @@ public class LibraryStateTests
         Assert.Equal("ayse@ornek.com", loan.Email);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Odunc_alininca_mevcut_kopya_1_azalmali()
     {
         var state = await CreateStateAsync();
@@ -125,7 +123,7 @@ public class LibraryStateTests
         Assert.Equal(1, BookById(state, "B001").AvailableCopies);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Kopya_0_iken_odunc_alinamaz()
     {
         var state = await CreateStateAsync();
@@ -139,7 +137,7 @@ public class LibraryStateTests
 
     // K7
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Ilk_uzatma_teslim_tarihini_7_gun_ileri_almali()
     {
         var state = await CreateStateAsync();
@@ -153,7 +151,7 @@ public class LibraryStateTests
         Assert.True(updated.IsExtended);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Ikinci_uzatma_reddedilmeli()
     {
         var state = await CreateStateAsync();
@@ -166,7 +164,7 @@ public class LibraryStateTests
         Assert.Equal(Today.Date.AddDays(21), state.Loans.Single(l => l.Id == loan.Id).DueDate.Date);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Suresi_gecmis_kayit_uzatilamaz()
     {
         var time = new FixedTimeProvider(Today);
@@ -182,7 +180,7 @@ public class LibraryStateTests
 
     // K8
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Iade_kaydi_iade_edildi_olarak_isaretlemeli()
     {
         var state = await CreateStateAsync();
@@ -196,7 +194,7 @@ public class LibraryStateTests
         Assert.Equal(LoanState.Returned, LoanRules.GetState(updated, Today));
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Iade_mevcut_kopyayi_1_artirmali()
     {
         var state = await CreateStateAsync();
@@ -207,7 +205,7 @@ public class LibraryStateTests
         Assert.Equal(2, BookById(state, "B001").AvailableCopies);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Iade_toplam_kopyayi_asmamali()
     {
         // Kayıt aktif ama localStorage'daki kopya sayısı zaten toplam kopyaya eşit (tutarsız veri).
@@ -226,7 +224,7 @@ public class LibraryStateTests
 
     // K9
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Iade_edilmis_kayit_tekrar_iade_edilemez()
     {
         var state = await CreateStateAsync();
@@ -239,7 +237,7 @@ public class LibraryStateTests
         Assert.Equal(2, BookById(state, "B001").AvailableCopies);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Iade_edilmis_kayit_uzatilamaz()
     {
         var state = await CreateStateAsync();
@@ -256,7 +254,7 @@ public class LibraryStateTests
 
     // K11
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Odunc_sonrasi_localStorage_a_yazilmali()
     {
         var storage = new FakeLocalStorage();
@@ -270,7 +268,7 @@ public class LibraryStateTests
         Assert.Equal(1, availability!["B001"]);
     }
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Yeni_LibraryState_ayni_kayitlari_ve_kopya_sayilarini_gormeli()
     {
         var storage = new FakeLocalStorage();
@@ -290,7 +288,7 @@ public class LibraryStateTests
 
     // OnChange
 
-    [Fact(Skip = Skip)]
+    [Fact]
     public async Task Basarili_islemden_sonra_OnChange_tetiklenmeli()
     {
         var state = await CreateStateAsync();
@@ -300,5 +298,67 @@ public class LibraryStateTests
         await state.BorrowAsync("B001", Form);
 
         Assert.Equal(1, count);
+    }
+
+    [Fact]
+    public async Task Basarisiz_islemde_OnChange_tetiklenmemeli()
+    {
+        var state = await CreateStateAsync();
+        var count = 0;
+        state.OnChange += () => count++;
+
+        await state.BorrowAsync("B002", Form);
+
+        Assert.Equal(0, count);
+    }
+
+    // InitializeAsync
+
+    [Fact]
+    public async Task InitializeAsync_sadece_ilk_cagrida_yukleme_yapmali()
+    {
+        var bookService = new FakeBookService(SampleBooks());
+        var state = new LibraryState(bookService, new FakeLocalStorage(), new FixedTimeProvider(Today));
+
+        await state.InitializeAsync();
+        await state.BorrowAsync("B001", Form);
+        await state.InitializeAsync();
+
+        Assert.Equal(1, bookService.CallCount);
+        Assert.Single(state.Loans);
+        Assert.Equal(1, BookById(state, "B001").AvailableCopies);
+    }
+
+    [Fact]
+    public async Task Bos_storage_ile_kitaplar_json_daki_kopya_sayilariyla_gelmeli()
+    {
+        var state = await CreateStateAsync();
+
+        Assert.Equal(3, state.Books.Count);
+        Assert.Empty(state.Loans);
+        Assert.Equal(2, BookById(state, "B001").AvailableCopies);
+        Assert.Equal(0, BookById(state, "B002").AvailableCopies);
+    }
+
+    // Olmayan id'ler
+
+    [Fact]
+    public async Task Olmayan_kitap_odunc_alinamaz()
+    {
+        var state = await CreateStateAsync();
+
+        var result = await state.BorrowAsync("B999", Form);
+
+        Assert.False(result.Success);
+        Assert.Empty(state.Loans);
+    }
+
+    [Fact]
+    public async Task Olmayan_kayit_uzatilamaz_ve_iade_edilemez()
+    {
+        var state = await CreateStateAsync();
+
+        Assert.False((await state.ExtendAsync("LIB-2026-999")).Success);
+        Assert.False((await state.ReturnAsync("LIB-2026-999")).Success);
     }
 }

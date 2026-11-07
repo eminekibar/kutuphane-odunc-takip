@@ -12,5 +12,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<LibraryState>();
 
 await builder.Build().RunAsync();
