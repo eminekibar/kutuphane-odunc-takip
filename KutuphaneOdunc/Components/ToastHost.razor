@@ -1,0 +1,93 @@
+﻿@implements IDisposable
+@inject ToastService Toasts
+
+@* Kapsayıcı boşken de sayfada durur: ekran okuyucular canlı bölgeyi ancak içerik eklenmeden önce varsa takip ediyor. *@
+<div class="toast-host" role="status" aria-live="polite">
+    @foreach (var toast in Toasts.Messages)
+    {
+        <div @key="toast.Id" class="toast-item @KindClass(toast.Kind)">
+            <span class="toast-icon" aria-hidden="true">@Icon(toast.Kind)</span>
+            <p class="toast-text"><span class="visually-hidden">@Label(toast.Kind): </span>@toast.Text</p>
+            <button type="button" class="toast-close" aria-label="Bildirimi kapat" @onclick="() => Toasts.Dismiss(toast.Id)">×</button>
+        </div>
+    }
+</div>
+
+@code {
+    // Bildirimin ekranda kalma süresi. Testlerde kısaltılabilsin diye parametre.
+    [Parameter]
+    public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(4);
+
+    // Kapanma zamanlayıcısı kurulmuş bildirimler; aynı bildirime ikinci zamanlayıcı kurulmasın diye.
+    private readonly HashSet<Guid> scheduled = new();
+    private readonly CancellationTokenSource disposing = new();
+
+    protected override void OnInitialized()
+    {
+        Toasts.OnChange += HandleChange;
+        ScheduleNew();
+    }
+
+    // OnChange başka bir bileşenden tetikleniyor; InvokeAsync çizimi Blazor'un kendi akışına alır.
+    private void HandleChange() => InvokeAsync(() =>
+    {
+        ScheduleNew();
+        StateHasChanged();
+    });
+
+    private void ScheduleNew()
+    {
+        foreach (var toast in Toasts.Messages)
+        {
+            if (scheduled.Add(toast.Id))
+                _ = DismissLaterAsync(toast.Id);
+        }
+    }
+
+    private async Task DismissLaterAsync(Guid id)
+    {
+        try
+        {
+            await Task.Delay(Duration, disposing.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        await InvokeAsync(() =>
+        {
+            scheduled.Remove(id);
+            Toasts.Dismiss(id);
+        });
+    }
+
+    private static string KindClass(ToastKind kind) => kind switch
+    {
+        ToastKind.Success => "success",
+        ToastKind.Error => "error",
+        _ => "info"
+    };
+
+    // Tür sadece renkle değil, ikonla ve ekran okuyucu için metinle de belirtiliyor.
+    private static string Icon(ToastKind kind) => kind switch
+    {
+        ToastKind.Success => "✓",
+        ToastKind.Error => "!",
+        _ => "i"
+    };
+
+    private static string Label(ToastKind kind) => kind switch
+    {
+        ToastKind.Success => "Başarılı",
+        ToastKind.Error => "Hata",
+        _ => "Bilgi"
+    };
+
+    public void Dispose()
+    {
+        Toasts.OnChange -= HandleChange;
+        disposing.Cancel();
+        disposing.Dispose();
+    }
+}

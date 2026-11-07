@@ -29,6 +29,7 @@ public class MyLoansPageTests : BunitContext
         Services.AddSingleton<TimeProvider>(_saat);
         Services.AddScoped<LibraryState>();
         Services.AddScoped<ProfileService>();
+        Services.AddScoped<ToastService>();
     }
 
     private LibraryState Library => Services.GetRequiredService<LibraryState>();
@@ -232,6 +233,37 @@ public class MyLoansPageTests : BunitContext
         Assert.Equal("Bu e-postayla alınmış kayıt yok.", cut.Find(".filter-empty").TextContent);
         Assert.Empty(cut.FindAll(".loan-status"));
         Assert.NotNull(cut.Find(".filter"));
+    }
+
+    // Bildirimler
+
+    private ToastService Toasts => Services.GetRequiredService<ToastService>();
+
+    [Fact]
+    public void Basarili_iadeden_sonra_basari_bildirimi_gosterilmeli()
+    {
+        KayitlariYaz(Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)));
+        var cut = SayfayiAc();
+
+        cut.Find(".current .return-button").Click();
+
+        cut.WaitForAssertion(() => Assert.Single(Toasts.Messages));
+        Assert.Equal(ToastKind.Success, Toasts.Messages[0].Kind);
+        Assert.Equal("Kitap iade edildi.", Toasts.Messages[0].Text);
+    }
+
+    [Fact]
+    public void Reddedilen_islemde_hata_bildirimi_gosterilmeli()
+    {
+        KayitlariYaz(Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)));
+        var cut = SayfayiAc();
+        _saat.Advance(TimeSpan.FromDays(6));
+
+        cut.Find(".extend-button").Click();
+
+        cut.WaitForAssertion(() => Assert.Single(Toasts.Messages));
+        Assert.Equal(ToastKind.Error, Toasts.Messages[0].Kind);
+        Assert.Equal("Teslim tarihi geçmiş bir kaydın süresi uzatılamaz.", Toasts.Messages[0].Text);
     }
 
     [Fact]

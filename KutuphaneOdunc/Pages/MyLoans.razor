@@ -3,6 +3,7 @@
 @inject LibraryState Library
 @inject ProfileService Profiles
 @inject TimeProvider Time
+@inject ToastService Toasts
 
 <PageTitle>Ödünç Kayıtlarım - Kütüphane Ödünç Takip</PageTitle>
 
@@ -145,12 +146,14 @@ else
     private async Task ExtendAsync(string loanId)
     {
         feedback = await Library.ExtendAsync(loanId);
+        Toasts.Show(feedback);
         focusFeedback = true;
     }
 
     private async Task ReturnAsync(string loanId)
     {
         feedback = await Library.ReturnAsync(loanId);
+        Toasts.Show(feedback);
         focusFeedback = true;
     }
 

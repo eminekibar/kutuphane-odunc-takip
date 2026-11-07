@@ -14,5 +14,6 @@ builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<LibraryState>();
 builder.Services.AddScoped<ProfileService>();
+builder.Services.AddScoped<ToastService>();
 
 await builder.Build().RunAsync();

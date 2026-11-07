@@ -1,5 +1,6 @@
 @page "/profile"
 @inject ProfileService Profiles
+@inject ToastService Toasts
 
 <PageTitle>Profilim - Kütüphane Ödünç Takip</PageTitle>
 
@@ -117,6 +118,7 @@ else
         model = CopyOf(Profiles.Profile);
         confirmingDelete = false;
         feedback = "Profiliniz kaydedildi.";
+        Toasts.Show(feedback, ToastKind.Success);
         pendingFocus = nameof(feedbackBox);
     }
 
@@ -139,6 +141,7 @@ else
         model = new UserProfile();
         confirmingDelete = false;
         feedback = "Profiliniz silindi.";
+        Toasts.Show(feedback, ToastKind.Info);
         pendingFocus = nameof(feedbackBox);
     }
 
