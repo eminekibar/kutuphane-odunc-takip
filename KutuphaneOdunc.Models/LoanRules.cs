@@ -21,6 +21,16 @@ public static class LoanRules
         return (loan.DueDate.Date - today.Date).Days;
     }
 
+    // "Teslimi yaklaşıyor" için kalan gün sınırı.
+    public const int DueSoonDays = 3;
+
+    // Aktif kayıtta teslime 3 gün ya da daha az kaldıysa true. Son teslim günü de dahil (0 gün kaldı).
+    // Gecikmiş ve iade edilmiş kayıtlar yaklaşan sayılmaz; LoanState'e yeni bir durum eklenmez.
+    public static bool IsDueSoon(Loan loan, DateTime today)
+    {
+        return GetState(loan, today) == LoanState.Active && RemainingDays(loan, today) <= DueSoonDays;
+    }
+
     // K7 ve K9: yalnızca aktif (iade edilmemiş, süresi geçmemiş) ve daha önce uzatılmamış kayıt.
     public static bool CanExtend(Loan loan, DateTime today)
     {
