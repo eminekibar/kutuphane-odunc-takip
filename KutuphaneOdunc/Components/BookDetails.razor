@@ -2,7 +2,8 @@
     <img class="cover" src="@CoverSrc" alt="@($"{Book.Title} kitabının kapağı")" @onerror="ShowDefaultCover" />
 
     <div class="info">
-        <h1 id="book-title" class="title">@Book.Title</h1>
+        @* tabindex="-1": başlık Tab sırasına girmez ama koddan odaklanabilir (bkz. FocusTitleAsync). *@
+        <h1 @ref="titleElement" id="book-title" class="title" tabindex="-1">@Book.Title</h1>
         <p class="author">@Book.Author</p>
         <span class="category">@Book.Category</span>
 
@@ -31,6 +32,12 @@
 </section>
 
 @code {
+    private ElementReference titleElement;
+
+    // Sayfa aynı kalıp başka bir kitaba geçince (#48) odak yeni kitabın başlığına taşınır.
+    // Kaydırmayı sayfa yaptığı için odak sayfayı ayrıca kaydırmaz.
+    public ValueTask FocusTitleAsync() => titleElement.FocusAsync(preventScroll: true);
+
     private const string DefaultCover = "images/default.svg";
 
     [Parameter, EditorRequired]

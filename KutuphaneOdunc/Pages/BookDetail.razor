@@ -2,6 +2,8 @@
 @inject LibraryState Library
 @inject ProfileService Profiles
 @inject ToastService Toasts
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>@PageTitleText - Kütüphane Ödünç Takip</PageTitle>
 
@@ -25,7 +27,7 @@ else if (book is null)
 }
 else
 {
-    <BookDetails Book="book" HasActiveLoan="Library.HasActiveLoan(book.Id)" OnBorrowClick="OpenForm" />
+    <BookDetails @ref="details" Book="book" HasActiveLoan="Library.HasActiveLoan(book.Id)" OnBorrowClick="OpenForm" />
 
     @if (result is not null)
     {
@@ -61,6 +63,8 @@ else
         }
         <BorrowForm Initial="ProfileAsForm" OnSubmit="BorrowAsync" OnCancel="CloseForm" />
     }
+
+    <SimilarBooks Current="book" Books="Library.Books" OnSelect="OpenBook" />
 }
 
 @code {
@@ -103,9 +107,28 @@ else
         if (!loaded)
             return;
 
+        // İlk açılışta değil, sadece sayfa açıkken başka bir kitaba geçildiğinde.
+        if (shownId is not null && !string.Equals(shownId, Id, StringComparison.OrdinalIgnoreCase))
+            moveToTop = true;
+        shownId = Id;
+
         book = Library.Books.FirstOrDefault(b => string.Equals(b.Id, Id, StringComparison.OrdinalIgnoreCase));
         showForm = false;
         result = null;
+    }
+
+    // Aynı sayfa bileşeni yeni kitapla tekrar kullanıldığında tarayıcı kaydırma konumunu korur ve
+    // App.razor'daki FocusOnNavigate de çalışmaz (sayfa tipi değişmedi). Kullanıcı sayfanın altında,
+    // odak da tıklanan ve artık listede olmayan kartla birlikte kayboluyordu; ikisini sayfa yapar.
+    private string? shownId;
+    private bool moveToTop;
+    private BookDetails? details;
+
+    // Benzer kitaba tıklanınca adres değişir; Blazor sayfayı yeniden oluşturmaz, sadece Id parametresini
+    // değiştirir. Kitap, form ve sonuç OnParametersSet'te yeni Id'ye göre sıfırlanır (#15).
+    private void OpenBook(Book selected)
+    {
+        Navigation.NavigateTo($"books/{selected.Id}");
     }
 
     private void OpenForm()
@@ -138,6 +161,14 @@ else
         {
             focusResult = false;
             await resultBox.FocusAsync();
+        }
+
+        if (moveToTop)
+        {
+            moveToTop = false;
+            await JS.InvokeVoidAsync("scrollTo", 0, 0);
+            if (details is not null)
+                await details.FocusTitleAsync();
         }
     }
 }
