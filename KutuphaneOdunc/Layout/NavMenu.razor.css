@@ -69,6 +69,25 @@
             outline-offset: 2px;
         }
 
+/* Ödünç rozeti: linkin sağ ucunda küçük bir hap. Gecikmiş kayıt varsa kırmızı. */
+.loan-badge {
+    margin-left: auto;
+    min-width: 1.5rem;
+    padding: 0 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.5rem;
+    text-align: center;
+    color: var(--renk-ana);
+    background-color: #FFFFFF;
+    border-radius: 999px;
+}
+
+    .loan-badge.overdue {
+        color: #FFFFFF;
+        background-color: var(--renk-tehlike);
+    }
+
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;
