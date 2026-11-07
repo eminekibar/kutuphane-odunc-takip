@@ -34,7 +34,22 @@
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
+    // Verilirse form bu bilgilerle dolu açılır (ör. profilden). Kullanıcı yine değiştirebilir.
+    [Parameter]
+    public BorrowFormModel? Initial { get; set; }
+
     private readonly BorrowFormModel model = new();
+
+    // Değerler formun kendi modeline kopyalanır; verilen nesne formda yazılanlarla değişmez.
+    // Sadece form ilk açılırken yapılır, sonradan gelen parametre kullanıcının yazdıklarını silmesin.
+    protected override void OnInitialized()
+    {
+        if (Initial is not null)
+        {
+            model.FullName = Initial.FullName;
+            model.Email = Initial.Email;
+        }
+    }
 
     // Sadece bütün doğrulamalar geçince çağrılır (OnValidSubmit).
     private Task SubmitAsync() => OnSubmit.InvokeAsync(model);

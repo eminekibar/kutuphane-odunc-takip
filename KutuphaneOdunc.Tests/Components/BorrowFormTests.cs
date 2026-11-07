@@ -86,6 +86,68 @@ public class BorrowFormTests : BunitContext
         Assert.True(cagrildi);
     }
 
+    // #41: Initial parametresi
+
+    [Fact]
+    public void Initial_verilince_alanlar_dolu_acilmali()
+    {
+        var cut = Render<BorrowForm>(p => p.Add(x => x.Initial,
+            new BorrowFormModel { FullName = "Ayşe Yılmaz", Email = "ayse@ornek.com" }));
+
+        Assert.Equal("Ayşe Yılmaz", cut.Find("#borrow-fullname").GetAttribute("value"));
+        Assert.Equal("ayse@ornek.com", cut.Find("#borrow-email").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void Initial_yokken_alanlar_bos_olmali()
+    {
+        var cut = Render<BorrowForm>();
+
+        Assert.Equal("", cut.Find("#borrow-fullname").GetAttribute("value") ?? "");
+        Assert.Equal("", cut.Find("#borrow-email").GetAttribute("value") ?? "");
+    }
+
+    [Fact]
+    public void Doldurulan_alan_degistirilince_OnSubmit_yeni_degerle_cagrilmali()
+    {
+        BorrowFormModel? gelen = null;
+        var cut = Render<BorrowForm>(p => p
+            .Add(x => x.Initial, new BorrowFormModel { FullName = "Ayşe Yılmaz", Email = "ayse@ornek.com" })
+            .Add(x => x.OnSubmit, (BorrowFormModel m) => gelen = m));
+
+        cut.Find("#borrow-email").Change("ayse.yilmaz@ornek.com");
+        cut.Find("form").Submit();
+
+        Assert.Equal("Ayşe Yılmaz", gelen!.FullName);
+        Assert.Equal("ayse.yilmaz@ornek.com", gelen.Email);
+    }
+
+    [Fact]
+    public void Initial_olarak_verilen_nesne_degismemeli()
+    {
+        var initial = new BorrowFormModel { FullName = "Ayşe Yılmaz", Email = "ayse@ornek.com" };
+        var cut = Render<BorrowForm>(p => p.Add(x => x.Initial, initial));
+
+        cut.Find("#borrow-fullname").Change("Ali Kaya");
+
+        Assert.Equal("Ayşe Yılmaz", initial.FullName);
+    }
+
+    [Fact]
+    public void Initial_ile_dolu_formda_da_dogrulama_calismali()
+    {
+        var cagrildi = false;
+        var cut = Render<BorrowForm>(p => p
+            .Add(x => x.Initial, new BorrowFormModel { FullName = "Ayşe Yılmaz", Email = "ayse@ornek.com" })
+            .Add(x => x.OnSubmit, (BorrowFormModel _) => cagrildi = true));
+
+        cut.Find("#borrow-email").Change("ayse");
+        cut.Find("form").Submit();
+
+        Assert.False(cagrildi);
+        Assert.Equal(new[] { "Geçerli bir e-posta adresi girin." }, HataMesajlari(cut));
+    }
+
     [Theory]
     [InlineData("borrow-fullname", "Ad soyad")]
     [InlineData("borrow-email", "E-posta")]
