@@ -1,0 +1,58 @@
+name: GitHub Pages
+
+# main'e her merge'de uygulama yayına hazırlanıp GitHub Pages'e yüklenir.
+# Actions sekmesinden elle de çalıştırılabilir (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Arka arkaya iki merge olursa yayınlar sırayla yapılır, yarıda kesilmez.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Uygulamayı yayına hazırla
+        run: dotnet publish KutuphaneOdunc/KutuphaneOdunc.csproj -c Release -o publish
+
+      - name: Alt klasör adresi, sayfa yenileme ve Jekyll ayarı
+        working-directory: publish/wwwroot
+        run: |
+          # Site eminekibar.github.io/<repo-adı>/ altında açılıyor; Blazor adresleri buna göre çözsün.
+          sed -i 's|<base href="/" />|<base href="/${{ github.event.repository.name }}/" />|' index.html
+          grep -q '<base href="/${{ github.event.repository.name }}/" />' index.html
+          # /books/B001 gibi bir adreste yenileyince GitHub 404.html'i döndürür; Blazor açılıp sayfayı kendisi bulur.
+          cp index.html 404.html
+          # GitHub Pages alt çizgiyle başlayan klasörleri (_framework) yayınlamasın diye Jekyll kapatılır.
+          touch .nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: publish/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

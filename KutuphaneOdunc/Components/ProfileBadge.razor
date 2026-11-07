@@ -3,7 +3,9 @@
 
 @* NavLink'in ürettiği <a> bu bileşenin scoped CSS niteliğini almıyor; stil kapsayıcı div üzerinden ::deep ile veriliyor. *@
 <div class="profile-badge">
-    <NavLink href="profile" aria-label="@Label">
+    @* aria-label kullanılmıyor: ekranda görünen yazı ("AY Ayşe Yılmaz") okunan adın içinde geçmeliydi (WCAG 2.5.3, #67).
+       Okunan ad linkin içeriğinden oluşuyor; avatar aria-hidden olduğu için atlanıyor, "Profilim: " öneki sadece ekran okuyucuya. *@
+    <NavLink href="profile">
         <span class="avatar @(Profile is null ? "no-profile" : null)" aria-hidden="true">
             @if (Profile is null)
             {
@@ -14,14 +16,16 @@
                 @Profile.Initials
             }
         </span>
+        @if (Profile is not null)
+        {
+            <span class="visually-hidden">Profilim: </span>
+        }
         <span class="name">@(Profile?.FullName ?? "Profil oluştur")</span>
     </NavLink>
 </div>
 
 @code {
     private UserProfile? Profile => Profiles.Profile;
-
-    private string Label => Profile is null ? "Profil oluştur" : $"Profilim: {Profile.FullName}";
 
     protected override async Task OnInitializedAsync()
     {
