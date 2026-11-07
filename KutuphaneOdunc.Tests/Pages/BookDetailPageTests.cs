@@ -257,6 +257,95 @@ public class BookDetailPageTests : BunitContext
         Assert.NotNull(cut.Find(".result .code"));
     }
 
+    // #48: benzer kitaplar
+
+    private static FakeBookService AyniKategoridenKitaplar() => new(new List<Book>
+    {
+        new() { Id = "B001", Title = "Yazılım Tasarımına Giriş", Category = "Bilgisayar Bilimleri", TotalCopies = 5, AvailableCopies = 3 },
+        new() { Id = "B003", Title = "Veri Yapıları ve Algoritmalar", Category = "Bilgisayar Bilimleri", TotalCopies = 4, AvailableCopies = 4 },
+        new() { Id = "B002", Title = "Araştırma Yöntemlerine Giriş", Category = "Bilim", TotalCopies = 2, AvailableCopies = 0 }
+    });
+
+    [Fact]
+    public void Benzer_kitaplar_bolumunde_ayni_kategoriden_kitap_gorunmeli()
+    {
+        ServisleriKaydet(AyniKategoridenKitaplar());
+
+        var cut = SayfayiAc("B001");
+
+        var basliklar = cut.FindAll(".similar-books .book-card .title").Select(t => t.TextContent).ToList();
+        Assert.Equal(new[] { "Veri Yapıları ve Algoritmalar" }, basliklar);
+    }
+
+    [Fact]
+    public void Benzer_kitaba_tiklaninca_adres_ve_gosterilen_kitap_degismeli()
+    {
+        ServisleriKaydet(AyniKategoridenKitaplar());
+        JSInterop.SetupVoid("scrollTo", _ => true).SetVoidResult();
+        var navigation = Services.GetRequiredService<Microsoft.AspNetCore.Components.NavigationManager>();
+        var cut = SayfayiAc("B001");
+
+        cut.Find(".similar-books .book-card").Click();
+
+        Assert.EndsWith("/books/B003", navigation.Uri);
+
+        // Gerçek uygulamada Router bu adres için aynı sayfa bileşenine yeni Id'yi veriyor; testte bunu biz yapıyoruz.
+        cut.Render(p => p.Add(x => x.Id, "B003"));
+
+        Assert.Equal("Veri Yapıları ve Algoritmalar", cut.Find("h1").TextContent);
+        Assert.Equal("4", MevcutKopya(cut));
+        Assert.Equal(new[] { "Yazılım Tasarımına Giriş" },
+            cut.FindAll(".similar-books .book-card .title").Select(t => t.TextContent));
+    }
+
+    [Fact]
+    public void Baska_kitaba_gecince_acik_form_ve_sonuc_sifirlanmali()
+    {
+        ServisleriKaydet(AyniKategoridenKitaplar());
+        JSInterop.SetupVoid("scrollTo", _ => true).SetVoidResult();
+        var cut = SayfayiAc("B001");
+        cut.Find(".borrow-button").Click();
+        Assert.NotEmpty(cut.FindAll("form"));
+
+        cut.Render(p => p.Add(x => x.Id, "B003"));
+
+        Assert.Empty(cut.FindAll("form"));
+        Assert.Empty(cut.FindAll(".result"));
+    }
+
+    [Fact]
+    public void Baska_kitaba_gecince_sayfa_en_uste_kaymali_ve_odak_basliga_gitmeli()
+    {
+        ServisleriKaydet(AyniKategoridenKitaplar());
+        JSInterop.SetupVoid("scrollTo", _ => true).SetVoidResult();
+        var cut = SayfayiAc("B001");
+
+        cut.Render(p => p.Add(x => x.Id, "B003"));
+
+        cut.WaitForAssertion(() =>
+        {
+            var kaydirma = JSInterop.VerifyInvoke("scrollTo");
+            Assert.Equal(new object?[] { 0, 0 }, kaydirma.Arguments);
+            // Başlık BookDetails'in içinde; bUnit alt bileşendeki elemanın kimliğini HTML'e yazmadığı için
+            // odak çağrısının yapıldığı ve başlığın odaklanabilir olduğu kontrol ediliyor (tarayıcıda da denendi).
+            JSInterop.VerifyFocusAsyncInvoke();
+        });
+        Assert.Equal("-1", cut.Find("h1").GetAttribute("tabindex"));
+        Assert.Equal("Veri Yapıları ve Algoritmalar", cut.Find("h1").TextContent);
+    }
+
+    [Fact]
+    public void Ilk_acilista_sayfa_kaydirilmamali()
+    {
+        ServisleriKaydet(AyniKategoridenKitaplar());
+
+        // scrollTo ayarlanmadı: bUnit'in katı modunda çağrılsaydı test hata verirdi.
+        var cut = SayfayiAc("B001");
+
+        Assert.Empty(JSInterop.Invocations["scrollTo"]);
+        Assert.Equal("Yazılım Tasarımına Giriş", cut.Find("h1").TextContent);
+    }
+
     private sealed class HataVerenBookService : IBookService
     {
         public Task<List<Book>> GetBooksAsync() =>

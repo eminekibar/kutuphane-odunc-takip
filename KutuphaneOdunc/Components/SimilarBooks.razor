@@ -1,0 +1,35 @@
+@* Gösterilecek kitap yoksa bölüm hiç çizilmez; boş bir başlık kalmasın. *@
+@if (Similar.Count > 0)
+{
+    <section class="similar-books" aria-labelledby="similar-heading">
+        <h2 id="similar-heading" class="section-title">Bu kategoriden diğer kitaplar</h2>
+        <div class="similar-grid">
+            @foreach (var book in Similar)
+            {
+                @* Kitap listesindeki kart (#10) aynen kullanılıyor. *@
+                <BookCard @key="book.Id" Book="book" OnSelect="OnSelect" />
+            }
+        </div>
+    </section>
+}
+
+@code {
+    private const int MaxCount = 4;
+
+    [Parameter, EditorRequired]
+    public Book Current { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Book> Books { get; set; } = Array.Empty<Book>();
+
+    [Parameter]
+    public EventCallback<Book> OnSelect { get; set; }
+
+    // Aynı kategori, gösterilen kitap hariç, önce ödünç alınabilir olanlar, en fazla 4.
+    // OrderByDescending sırayı bozmuyor: aynı gruptakiler books.json'daki sırasıyla kalıyor.
+    private List<Book> Similar => Books
+        .Where(b => b.Category == Current.Category && b.Id != Current.Id)
+        .OrderByDescending(b => b.AvailableCopies > 0)
+        .Take(MaxCount)
+        .ToList();
+}
