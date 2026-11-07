@@ -1,0 +1,59 @@
+h1 {
+    margin-bottom: 0.25rem;
+}
+
+.lead-text {
+    margin-bottom: 1.25rem;
+    color: var(--renk-yazi-soluk);
+}
+
+.loading {
+    padding: 2rem 0;
+    color: var(--renk-yazi-soluk);
+}
+
+.empty {
+    padding: 2rem 1.25rem;
+    text-align: center;
+    background-color: #FFFFFF;
+    border: 1px dashed var(--renk-kenar);
+    border-radius: 8px;
+}
+
+    .empty p {
+        margin-bottom: 1rem;
+        font-size: 1.05rem;
+    }
+
+.feedback {
+    margin-bottom: 1.25rem;
+}
+
+.loan-section {
+    margin-bottom: 2rem;
+}
+
+    .loan-section h2 {
+        margin-bottom: 0.75rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+.section-empty {
+    color: var(--renk-yazi-soluk);
+}
+
+.loan-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 992px) {
+    .loan-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
