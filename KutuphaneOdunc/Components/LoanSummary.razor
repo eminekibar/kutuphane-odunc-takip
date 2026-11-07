@@ -1,0 +1,29 @@
+﻿<ul class="loan-summary" aria-label="Kayıt özeti">
+    <li class="summary-box active">
+        <span class="count">@ActiveCount</span>
+        <span class="label">Aktif</span>
+    </li>
+    <li class="summary-box overdue @(OverdueCount > 0 ? "highlight" : "")">
+        <span class="count">@OverdueCount</span>
+        <span class="label">Gecikmiş</span>
+    </li>
+    <li class="summary-box returned">
+        <span class="count">@ReturnedCount</span>
+        <span class="label">İade edilen</span>
+    </li>
+</ul>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Loan> Loans { get; set; } = Array.Empty<Loan>();
+
+    [Parameter, EditorRequired]
+    public DateTime Today { get; set; }
+
+    // Durumlar kayıt kartlarındaki etiketlerle aynı kuraldan hesaplanır: LoanRules.GetState.
+    private int ActiveCount => Count(LoanState.Active);
+    private int OverdueCount => Count(LoanState.Overdue);
+    private int ReturnedCount => Count(LoanState.Returned);
+
+    private int Count(LoanState state) => Loans.Count(l => LoanRules.GetState(l, Today) == state);
+}

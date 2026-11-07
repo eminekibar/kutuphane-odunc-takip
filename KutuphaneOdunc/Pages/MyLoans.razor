@@ -58,6 +58,9 @@ else
     }
     else
     {
+        @* Özet, filtre uygulanmış listeyi sayar: "Sadece benim kayıtlarım" seçiliyse sadece onlar. *@
+        <LoanSummary Loans="VisibleLoans" Today="Today" />
+
         <section class="loan-section current" aria-labelledby="current-heading">
             <h2 id="current-heading">Güncel kayıtlar</h2>
             @if (CurrentLoans.Count == 0)
