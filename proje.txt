@@ -1,0 +1,92 @@
+KÜTÜPHANE KİTAP ÖDÜNÇ ALMA VE TAKİP UYGULAMASI
+İleri Web Programlama - Blazor WebAssembly (.NET 8)
+
+Kaynak kod: https://github.com/eminekibar/kutuphane-odunc-takip
+Wiki (her işin ayrıntılı açıklaması): https://github.com/eminekibar/kutuphane-odunc-takip/wiki
+
+
+PROJE ÜYELERİ
+-------------
+Öğrenci No       Ad Soyad
+1230505017       Emine Kibar
+1210505805       Ayça Albayrak
+
+
+GÖREV DAĞILIMI
+--------------
+İşler GitHub'da issue olarak açıldı. Her issue bir üyeye atandı, ayrı bir branch'te yapıldı
+ve diğer üyenin onayıyla (pull request) birleştirildi. Aşağıda her üyenin kapattığı issue'lar
+var; parantez içindeki numara GitHub'daki issue numarası.
+
+
+Emine Kibar
+...........
+Proje altyapısı
+  - Proje iskeleti (#1)
+  - CI: build ve test workflow'u (#2)
+  - books.json (#3)
+  - Kapak görselleri (#4)
+
+Bileşenler ve sayfalar
+  - Layout ve menü (#9)
+  - BookCard ve BookList bileşenleri (#10)
+  - BookDetails bileşeni (#11)
+  - BorrowForm bileşeni (#12)
+  - /books sayfası (#14)
+
+Test ve yayın
+  - Uçtan uca testler, Playwright (#18)
+  - GitHub Pages'e yayınlama (#22)
+
+Ek özellikler
+  - Ödünç kayıtlarında kişi bilgisi ve 'Sadece benim kayıtlarım' filtresi (#42)
+  - Bildirim (toast) sistemi (#43)
+  - 'Teslimi yaklaşıyor' etiketi (#44)
+  - Menüde ödünç rozeti (#45)
+  - Ödünç kayıtları özeti (#46)
+  - Kitap listesinde sıralama ve 'Sadece ödünç alınabilir olanlar' (#49)
+  - Kitap listesinde ters sıralama yönleri
+
+Hata düzeltmeleri
+  - Ödünç formu kart görünümünde değil (#52)
+  - Menüde rozetli link iki satıra bölünüyor, özet kutuları telefonda 2+1 diziliyor (#69)
+
+
+Ayça Albayrak
+.............
+Veri modeli ve durum yönetimi
+  - Modeller ve doğrulama (#5)
+  - Servis arayüzleri ve implementasyonları (#6)
+  - LibraryState API'si ve kural testleri (#7)
+  - LibraryState implementasyonu (#8)
+
+Bileşenler ve sayfalar
+  - LoanStatus bileşeni (#13)
+  - /books/{id} sayfası (#15)
+  - /my-loans sayfası (#16)
+
+Test ve kontrol
+  - Responsive ve erişilebilirlik kontrolü (#17)
+  - Bonus özellikler için uçtan uca, responsive ve erişilebilirlik kontrolü (#50)
+
+Ek özellikler
+  - Profil: ProfileService ve /profile sayfası (#39)
+  - Sol menüde profil alanı (avatar) (#40)
+  - Ödünç formunun profilden dolması (#41)
+  - Takvime ekle (.ics) (#47)
+  - Benzer kitaplar (#48)
+
+Hata düzeltmeleri
+  - Menüdeki profil linkinin erişilebilir adı görünen yazıyı içermiyor (#67)
+  - Profil silme sorusundaki Vazgeç butonunun kontrastı yetersiz (#71)
+
+Doküman ve teslim
+  - README (#19)
+  - proje.txt (#20)
+  - Video ve teslim (#21)
+
+
+ORTAK
+-----
+  - Her pull request diğer üyenin incelemesi ve onayıyla birleştirildi.
+  - Her issue için wiki'de bir açıklama sayfası yazıldı.
