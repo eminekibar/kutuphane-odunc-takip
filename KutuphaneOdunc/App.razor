@@ -4,9 +4,11 @@
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
-        <PageTitle>Not found</PageTitle>
+        <PageTitle>Sayfa bulunamadı - Kütüphane Ödünç Takip</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+            <h1>Sayfa bulunamadı</h1>
+            <p role="alert">Aradığınız adreste bir sayfa yok.</p>
+            <a href="books">Kitaplara dön</a>
         </LayoutView>
     </NotFound>
 </Router>
