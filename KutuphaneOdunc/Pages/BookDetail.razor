@@ -1,0 +1,110 @@
+@page "/books/{Id}"
+@inject LibraryState Library
+
+<PageTitle>@PageTitleText - Kütüphane Ödünç Takip</PageTitle>
+
+<a class="back-link" href="books">← Kitaplara dön</a>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+else if (!loaded)
+{
+    <p class="loading" role="status">Yükleniyor...</p>
+}
+else if (book is null)
+{
+    <div class="not-found">
+        <h1>Kitap bulunamadı</h1>
+        <p>Aradığınız kitap listede yok. Adres yanlış yazılmış olabilir.</p>
+        <a class="btn btn-primary" href="books">Kitap listesine dön</a>
+    </div>
+}
+else
+{
+    <BookDetails Book="book" HasActiveLoan="Library.HasActiveLoan(book.Id)" OnBorrowClick="OpenForm" />
+
+    @if (result is not null)
+    {
+        @if (result.Success && result.Loan is not null)
+        {
+            <div class="alert alert-success result" role="status">
+                <p class="result-title">Kitap ödünç alındı.</p>
+                <dl class="result-facts">
+                    <dt>Ödünç kodu</dt>
+                    <dd class="code">@result.Loan.Id</dd>
+                    <dt>Son teslim tarihi</dt>
+                    <dd>@result.Loan.DueDate.ToString("dd.MM.yyyy")</dd>
+                </dl>
+                <a href="my-loans">Ödünç kayıtlarıma git</a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger result" role="alert">@result.Message</div>
+        }
+    }
+
+    @if (showForm)
+    {
+        <BorrowForm OnSubmit="BorrowAsync" OnCancel="CloseForm" />
+    }
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = "";
+
+    private bool loaded;
+    private string? errorMessage;
+    private Book? book;
+    private bool showForm;
+    private ActionResult? result;
+
+    private string PageTitleText =>
+        book is not null ? book.Title
+        : loaded ? "Kitap bulunamadı"
+        : "Kitap";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await Library.InitializeAsync();
+            loaded = true;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Kitap bilgileri yüklenemedi. Sayfayı yenileyip tekrar deneyin.";
+        }
+    }
+
+    // OnInitializedAsync bittikten sonra, ve adres başka bir kitaba değiştiğinde (sayfa yeniden oluşturulmadan) çalışır.
+    protected override void OnParametersSet()
+    {
+        if (!loaded)
+            return;
+
+        book = Library.Books.FirstOrDefault(b => string.Equals(b.Id, Id, StringComparison.OrdinalIgnoreCase));
+        showForm = false;
+        result = null;
+    }
+
+    private void OpenForm()
+    {
+        result = null;
+        showForm = true;
+    }
+
+    private void CloseForm()
+    {
+        showForm = false;
+    }
+
+    private async Task BorrowAsync(BorrowFormModel form)
+    {
+        result = await Library.BorrowAsync(book!.Id, form);
+        showForm = false;
+    }
+}
