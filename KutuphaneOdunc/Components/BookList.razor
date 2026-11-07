@@ -1,0 +1,66 @@
+﻿<div class="filters">
+    <div class="filter">
+        <label for="book-search">Kitap adı veya yazar</label>
+        <input id="book-search" type="search" class="form-control" placeholder="Örn. İstanbul, Ayşe Yılmaz"
+               @bind="searchText" @bind:event="oninput" />
+    </div>
+    <div class="filter">
+        <label for="book-category">Kategori</label>
+        <select id="book-category" class="form-select" @bind="selectedCategory">
+            <option value="">Tüm kategoriler</option>
+            @foreach (var category in Categories)
+            {
+                <option value="@category">@category</option>
+            }
+        </select>
+    </div>
+</div>
+
+<p class="result-count" aria-live="polite">@FilteredBooks.Count kitap listeleniyor</p>
+
+@if (FilteredBooks.Count == 0)
+{
+    <p class="empty">Kitap bulunamadı. Aramayı ya da kategoriyi değiştirmeyi deneyin.</p>
+}
+else
+{
+    <div class="book-grid">
+        @foreach (var book in FilteredBooks)
+        {
+            <BookCard @key="book.Id" Book="book" OnSelect="OnBookSelected" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public List<Book> Books { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Book> OnBookSelected { get; set; }
+
+    private string searchText = "";
+    private string selectedCategory = "";
+
+    private IEnumerable<string> Categories =>
+        Books.Select(b => b.Category).Distinct().OrderBy(c => c);
+
+    private List<Book> FilteredBooks => Books.Where(Matches).ToList();
+
+    private bool Matches(Book book)
+    {
+        if (selectedCategory != "" && book.Category != selectedCategory)
+            return false;
+
+        var term = Normalize(searchText.Trim());
+        if (term == "")
+            return true;
+
+        return Normalize(book.Title).Contains(term) || Normalize(book.Author).Contains(term);
+    }
+
+    // Türkçe büyük-küçük harf: "I" -> "ı", "İ" -> "i". Böylece "istanbul" araması "İstanbul"u bulur.
+    // Tarayıcının dil ayarından bağımsız çalışması için kültüre bağlı ToLower yerine elle eşleniyor.
+    private static string Normalize(string text) =>
+        text.Replace('I', 'ı').Replace('İ', 'i').ToLowerInvariant();
+}
