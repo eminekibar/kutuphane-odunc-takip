@@ -1,0 +1,159 @@
+@page "/profile"
+@inject ProfileService Profiles
+
+<PageTitle>Profilim - Kütüphane Ödünç Takip</PageTitle>
+
+<h1>Profilim</h1>
+
+<p class="info-note" role="note">
+    Bu uygulama tek tarayıcıda çalışan bir prototiptir. Profil bilgileriniz sadece bu tarayıcıda saklanır.
+</p>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+else if (!loaded)
+{
+    <p class="loading" role="status">Yükleniyor...</p>
+}
+else
+{
+    @if (Profiles.Profile is not null)
+    {
+        <div class="summary">
+            <span class="avatar" aria-hidden="true">@Profiles.Profile.Initials</span>
+            <div>
+                <p class="summary-name">@Profiles.Profile.FullName</p>
+                <p class="summary-email">@Profiles.Profile.Email</p>
+            </div>
+        </div>
+    }
+
+    @if (feedback is not null)
+    {
+        @* tabindex="-1": kutu Tab sırasına girmez ama koddan odaklanabilir. *@
+        <div @ref="feedbackBox" tabindex="-1" class="alert alert-success feedback" role="status">@feedback</div>
+    }
+
+    @* <form> elemanını EditForm bileşeni çiziyor, scoped CSS ona ulaşmıyor; kutu görünümü bu div'de. *@
+    <div class="profile-form">
+    <EditForm Model="model" OnValidSubmit="SaveAsync" novalidate>
+        <DataAnnotationsValidator />
+
+        <h2 class="form-title">Profil bilgileri</h2>
+
+        <div class="field">
+            <label for="profile-fullname">Ad soyad</label>
+            <InputText id="profile-fullname" class="form-control" autocomplete="name" @bind-Value="model.FullName" />
+            <ValidationMessage For="() => model.FullName" />
+        </div>
+
+        <div class="field">
+            <label for="profile-email">E-posta</label>
+            <InputText id="profile-email" type="email" class="form-control" autocomplete="email" @bind-Value="model.Email" />
+            <ValidationMessage For="() => model.Email" />
+        </div>
+
+        <div class="buttons">
+            <button type="submit" class="btn btn-primary save-button">Kaydet</button>
+            @if (Profiles.Profile is not null && !confirmingDelete)
+            {
+                <button @ref="deleteButton" type="button" class="btn btn-outline-danger delete-button" @onclick="AskDelete">
+                    Profili sil
+                </button>
+            }
+        </div>
+
+        @if (confirmingDelete)
+        {
+            <div @ref="confirmBox" tabindex="-1" class="confirm" role="group" aria-labelledby="confirm-text">
+                <p id="confirm-text" class="confirm-text">Profiliniz bu tarayıcıdan silinecek. Emin misiniz?</p>
+                <div class="buttons">
+                    <button type="button" class="btn btn-danger confirm-yes" @onclick="DeleteAsync">Evet</button>
+                    <button type="button" class="btn btn-outline-secondary confirm-no" @onclick="CancelDelete">Vazgeç</button>
+                </div>
+            </div>
+        }
+    </EditForm>
+    </div>
+}
+
+@code {
+    private bool loaded;
+    private string? errorMessage;
+    private UserProfile model = new();
+    private string? feedback;
+    private bool confirmingDelete;
+
+    private ElementReference feedbackBox;
+    private ElementReference confirmBox;
+    private ElementReference deleteButton;
+
+    // Bir işlemden sonra kaybolan butonun yerine odağın gideceği yer; çizim bitince taşınır.
+    private string? pendingFocus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await Profiles.InitializeAsync();
+            model = CopyOf(Profiles.Profile);
+            loaded = true;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Profil bilgileri yüklenemedi. Sayfayı yenileyip tekrar deneyin.";
+        }
+    }
+
+    private static UserProfile CopyOf(UserProfile? profile) => profile is null
+        ? new UserProfile()
+        : new UserProfile { FullName = profile.FullName, Email = profile.Email };
+
+    private async Task SaveAsync()
+    {
+        await Profiles.SaveAsync(model);
+        model = CopyOf(Profiles.Profile);
+        confirmingDelete = false;
+        feedback = "Profiliniz kaydedildi.";
+        pendingFocus = nameof(feedbackBox);
+    }
+
+    private void AskDelete()
+    {
+        feedback = null;
+        confirmingDelete = true;
+        pendingFocus = nameof(confirmBox);
+    }
+
+    private void CancelDelete()
+    {
+        confirmingDelete = false;
+        pendingFocus = nameof(deleteButton);
+    }
+
+    private async Task DeleteAsync()
+    {
+        await Profiles.ClearAsync();
+        model = new UserProfile();
+        confirmingDelete = false;
+        feedback = "Profiliniz silindi.";
+        pendingFocus = nameof(feedbackBox);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var target = pendingFocus switch
+        {
+            nameof(feedbackBox) => feedbackBox,
+            nameof(confirmBox) => confirmBox,
+            nameof(deleteButton) => deleteButton,
+            _ => (ElementReference?)null
+        };
+        pendingFocus = null;
+
+        if (target is { } element)
+            await element.FocusAsync();
+    }
+}
