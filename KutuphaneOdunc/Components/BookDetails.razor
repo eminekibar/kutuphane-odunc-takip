@@ -1,0 +1,60 @@
+﻿<section class="book-details" aria-labelledby="book-title">
+    <img class="cover" src="@CoverSrc" alt="@($"{Book.Title} kitabının kapağı")" @onerror="ShowDefaultCover" />
+
+    <div class="info">
+        <h1 id="book-title" class="title">@Book.Title</h1>
+        <p class="author">@Book.Author</p>
+        <span class="category">@Book.Category</span>
+
+        <dl class="facts">
+            <dt>Yayınevi</dt>
+            <dd>@Book.Publisher</dd>
+            <dt>Basım yılı</dt>
+            <dd>@Book.PublicationYear</dd>
+            <dt>Toplam kopya</dt>
+            <dd>@Book.TotalCopies</dd>
+            <dt>Ödünç alınabilir</dt>
+            <dd><span class="available @(Book.AvailableCopies == 0 ? "none" : "")">@Book.AvailableCopies</span></dd>
+        </dl>
+
+        <div class="actions">
+            <button type="button" class="btn btn-primary borrow-button" disabled="@(DisabledReason is not null)"
+                    aria-describedby="@(DisabledReason is null ? null : "borrow-reason")" @onclick="OnBorrowClick">
+                Ödünç Al
+            </button>
+            @if (DisabledReason is not null)
+            {
+                <p id="borrow-reason" class="borrow-reason">@DisabledReason</p>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private const string DefaultCover = "images/default.svg";
+
+    [Parameter, EditorRequired]
+    public Book Book { get; set; } = default!;
+
+    [Parameter]
+    public bool HasActiveLoan { get; set; }
+
+    [Parameter]
+    public EventCallback OnBorrowClick { get; set; }
+
+    private bool coverFailed;
+
+    private string CoverSrc =>
+        coverFailed || string.IsNullOrWhiteSpace(Book.CoverUrl) ? DefaultCover : Book.CoverUrl;
+
+    // Buton pasifse sebebi, aktifse null. İkisi birden geçerliyse aktif kayıt mesajı daha açıklayıcı.
+    private string? DisabledReason =>
+        HasActiveLoan ? "Bu kitabı zaten ödünç aldınız."
+        : Book.AvailableCopies == 0 ? "Şu an ödünç alınabilir kopya yok."
+        : null;
+
+    private void ShowDefaultCover()
+    {
+        coverFailed = true;
+    }
+}
