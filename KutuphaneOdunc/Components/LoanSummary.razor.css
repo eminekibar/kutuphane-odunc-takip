@@ -1,7 +1,7 @@
-/* Kutular yan yana; ekran daralıp 7rem'lik kutu sığmayınca alt alta iner. */
+/* Üç kutu yan yana. Çok dar ekranlarda (360 pikselden dar) alt alta. */
 .loan-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     margin: 0 0 1.5rem;
     padding: 0;
@@ -24,6 +24,7 @@
 }
 
 .label {
+    font-size: 0.9rem;
     color: var(--renk-yazi-soluk);
 }
 
@@ -37,3 +38,9 @@
     .summary-box.highlight .label {
         color: var(--renk-tehlike);
     }
+
+@media (max-width: 359.98px) {
+    .loan-summary {
+        grid-template-columns: 1fr;
+    }
+}
