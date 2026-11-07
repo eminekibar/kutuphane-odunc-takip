@@ -48,6 +48,13 @@
                 aria-describedby="@TitleId" @onclick="ReturnAsync">
             İade Et
         </button>
+        @if (State != LoanState.Returned)
+        {
+            <button type="button" class="btn btn-outline-secondary calendar-button"
+                    aria-describedby="@TitleId" @onclick="AddToCalendarAsync">
+                Takvime ekle
+            </button>
+        }
     </div>
 </article>
 
@@ -105,4 +112,18 @@
     private Task ExtendAsync() => OnExtend.InvokeAsync(Loan.Id);
 
     private Task ReturnAsync() => OnReturn.InvokeAsync(Loan.Id);
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    [Inject]
+    private TimeProvider Time { get; set; } = default!;
+
+    // Dosya her tıklamada o anki teslim tarihiyle üretilir; süre uzatıldıysa yeni tarih gelir.
+    private async Task AddToCalendarAsync()
+    {
+        var content = CalendarFileBuilder.Build(Loan, BookTitle, Time.GetUtcNow().UtcDateTime);
+        await JS.InvokeVoidAsync("kutuphane.downloadFile",
+            CalendarFileBuilder.FileName(Loan), content, "text/calendar;charset=utf-8");
+    }
 }
