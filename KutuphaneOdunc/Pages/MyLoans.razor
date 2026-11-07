@@ -1,6 +1,7 @@
 @page "/my-loans"
 @implements IDisposable
 @inject LibraryState Library
+@inject ProfileService Profiles
 @inject TimeProvider Time
 
 <PageTitle>Ödünç Kayıtlarım - Kütüphane Ödünç Takip</PageTitle>
@@ -35,39 +36,61 @@ else
         </div>
     }
 
-    <section class="loan-section current" aria-labelledby="current-heading">
-        <h2 id="current-heading">Güncel kayıtlar</h2>
-        @if (CurrentLoans.Count == 0)
-        {
-            <p class="section-empty">Şu an iade etmeniz gereken bir kitap yok. <a href="books">Kitaplara göz atın.</a></p>
-        }
-        else
-        {
-            <ul class="loan-list">
-                @foreach (var loan in CurrentLoans)
-                {
-                    <li @key="loan.Id">
-                        <LoanStatus Loan="loan" BookTitle="@TitleOf(loan)" Today="Today"
-                                    OnExtend="ExtendAsync" OnReturn="ReturnAsync" />
-                    </li>
-                }
-            </ul>
-        }
-    </section>
-
-    @if (PastLoans.Count > 0)
+    @* Filtre sadece profil varsa anlamlı: "benim" e-postası profildeki e-posta. *@
+    @if (Profiles.Profile is not null)
     {
-        <section class="loan-section history" aria-labelledby="history-heading">
-            <h2 id="history-heading">Geçmiş</h2>
-            <ul class="loan-list">
-                @foreach (var loan in PastLoans)
-                {
-                    <li @key="loan.Id">
-                        <LoanStatus Loan="loan" BookTitle="@TitleOf(loan)" Today="Today" />
-                    </li>
-                }
-            </ul>
+        <div class="filter" role="group" aria-label="Kayıtları filtrele">
+            <button type="button" class="filter-option filter-all @(onlyMine ? "" : "selected")"
+                    aria-pressed="@(onlyMine ? "false" : "true")" @onclick="() => onlyMine = false">
+                Tüm kayıtlar
+            </button>
+            <button type="button" class="filter-option filter-mine @(onlyMine ? "selected" : "")"
+                    aria-pressed="@(onlyMine ? "true" : "false")" @onclick="() => onlyMine = true">
+                Sadece benim kayıtlarım
+            </button>
+        </div>
+    }
+
+    @if (VisibleLoans.Count == 0)
+    {
+        <p class="filter-empty">Bu e-postayla alınmış kayıt yok.</p>
+    }
+    else
+    {
+        <section class="loan-section current" aria-labelledby="current-heading">
+            <h2 id="current-heading">Güncel kayıtlar</h2>
+            @if (CurrentLoans.Count == 0)
+            {
+                <p class="section-empty">Şu an iade etmeniz gereken bir kitap yok. <a href="books">Kitaplara göz atın.</a></p>
+            }
+            else
+            {
+                <ul class="loan-list">
+                    @foreach (var loan in CurrentLoans)
+                    {
+                        <li @key="loan.Id">
+                            <LoanStatus Loan="loan" BookTitle="@TitleOf(loan)" Today="Today"
+                                        OnExtend="ExtendAsync" OnReturn="ReturnAsync" />
+                        </li>
+                    }
+                </ul>
+            }
         </section>
+
+        @if (PastLoans.Count > 0)
+        {
+            <section class="loan-section history" aria-labelledby="history-heading">
+                <h2 id="history-heading">Geçmiş</h2>
+                <ul class="loan-list">
+                    @foreach (var loan in PastLoans)
+                    {
+                        <li @key="loan.Id">
+                            <LoanStatus Loan="loan" BookTitle="@TitleOf(loan)" Today="Today" />
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
     }
 }
 
@@ -76,16 +99,26 @@ else
     private string? errorMessage;
     private ActionResult? feedback;
 
+    private bool onlyMine;
+
     private DateTime Today => Time.GetLocalNow().Date;
 
+    // "Sadece benim kayıtlarım" seçiliyse profildeki e-postayla alınmış kayıtlar.
+    // E-posta büyük/küçük harf duyarsız karşılaştırılır: AYSE@ornek.com ile ayse@ornek.com aynı adres.
+    private List<Loan> VisibleLoans => onlyMine && Profiles.Profile is { } profile
+        ? Library.Loans
+            .Where(l => string.Equals(l.Email?.Trim(), profile.Email.Trim(), StringComparison.OrdinalIgnoreCase))
+            .ToList()
+        : Library.Loans.ToList();
+
     // Teslim tarihi en yakın olan (ve gecikmiş olan) en üstte.
-    private List<Loan> CurrentLoans => Library.Loans
+    private List<Loan> CurrentLoans => VisibleLoans
         .Where(l => l.ReturnedAt is null)
         .OrderBy(l => l.DueDate)
         .ToList();
 
     // En son iade edilen en üstte.
-    private List<Loan> PastLoans => Library.Loans
+    private List<Loan> PastLoans => VisibleLoans
         .Where(l => l.ReturnedAt is not null)
         .OrderByDescending(l => l.ReturnedAt)
         .ToList();
@@ -97,6 +130,7 @@ else
         try
         {
             await Library.InitializeAsync();
+            await Profiles.InitializeAsync();
             loaded = true;
         }
         catch (Exception)
