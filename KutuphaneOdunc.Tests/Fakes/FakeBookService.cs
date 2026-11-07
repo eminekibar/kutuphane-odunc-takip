@@ -15,8 +15,12 @@ public class FakeBookService : IBookService
         _books = books.ToList();
     }
 
+    public int CallCount { get; private set; }
+
     public Task<List<Book>> GetBooksAsync()
     {
+        CallCount++;
+
         var copies = _books.Select(b => new Book
         {
             Id = b.Id,
