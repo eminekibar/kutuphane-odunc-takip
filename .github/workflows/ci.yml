@@ -14,4 +14,18 @@ jobs:
           global-json-file: global.json
       - run: dotnet restore
       - run: dotnet build --no-restore -c Release
-      - run: dotnet test --no-build -c Release --logger "console;verbosity=normal"
+      # Sadece birim ve bileşen testleri. Uçtan uca testler aşağıdaki ayrı job'da çalışıyor.
+      - run: dotnet test KutuphaneOdunc.Tests --no-build -c Release --logger "console;verbosity=normal"
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet build KutuphaneOdunc.E2ETests -c Release
+      # Chromium'u ve Linux'ta çalışması için gereken sistem paketlerini kurar.
+      - run: pwsh KutuphaneOdunc.E2ETests/bin/Release/net8.0/playwright.ps1 install --with-deps chromium
+      - run: dotnet test KutuphaneOdunc.E2ETests --no-build -c Release --logger "console;verbosity=normal"
