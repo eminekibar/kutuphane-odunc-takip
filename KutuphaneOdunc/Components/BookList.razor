@@ -14,6 +14,19 @@
             }
         </select>
     </div>
+    <div class="filter">
+        <label for="book-sort">Sıralama</label>
+        <select id="book-sort" class="form-select" @bind="sortOrder">
+            <option value="@SortTitle">Ada göre (A → Z)</option>
+            <option value="@SortAuthor">Yazara göre (A → Z)</option>
+            <option value="@SortYear">Basım yılına göre (yeniden eskiye)</option>
+            <option value="@SortAvailable">Mevcut kopyaya göre (çoktan aza)</option>
+        </select>
+    </div>
+    <div class="filter available-only form-check">
+        <input id="book-available-only" type="checkbox" class="form-check-input" @bind="availableOnly" />
+        <label for="book-available-only" class="form-check-label">Sadece ödünç alınabilir olanlar</label>
+    </div>
 </div>
 
 <p class="result-count" aria-live="polite">@FilteredBooks.Count kitap listeleniyor</p>
@@ -39,16 +52,44 @@ else
     [Parameter]
     public EventCallback<Book> OnBookSelected { get; set; }
 
+    private const string SortTitle = "title";
+    private const string SortAuthor = "author";
+    private const string SortYear = "year";
+    private const string SortAvailable = "available";
+
     private string searchText = "";
     private string selectedCategory = "";
+    private string sortOrder = SortTitle;
+    private bool availableOnly;
 
     private IEnumerable<string> Categories =>
         Books.Select(b => b.Category).Distinct().OrderBy(c => c);
 
-    private List<Book> FilteredBooks => Books.Where(Matches).ToList();
+    // Önce süzülür (arama, kategori, onay kutusu), sonra sıralanır.
+    // Eşitlikte kitaplar kendi aralarında ada göre dizilir; sıra her seferinde aynı olur.
+    private List<Book> FilteredBooks
+    {
+        get
+        {
+            var books = Books.Where(Matches);
+
+            var sorted = sortOrder switch
+            {
+                SortAuthor => books.OrderBy(b => b.Author, TurkishComparer),
+                SortYear => books.OrderByDescending(b => b.PublicationYear),
+                SortAvailable => books.OrderByDescending(b => b.AvailableCopies),
+                _ => books.OrderBy(b => b.Title, TurkishComparer)
+            };
+
+            return sorted.ThenBy(b => b.Title, TurkishComparer).ToList();
+        }
+    }
 
     private bool Matches(Book book)
     {
+        if (availableOnly && book.AvailableCopies == 0)
+            return false;
+
         if (selectedCategory != "" && book.Category != selectedCategory)
             return false;
 
@@ -63,4 +104,43 @@ else
     // Tarayıcının dil ayarından bağımsız çalışması için kültüre bağlı ToLower yerine elle eşleniyor.
     private static string Normalize(string text) =>
         text.Replace('I', 'ı').Replace('İ', 'i').ToLowerInvariant();
+
+    // Türk alfabesi sırası. Tarayıcının dil ayarı İngilizce olabileceği için kültüre bağlı karşılaştırma
+    // kullanılmıyor; harflerin sırası buradan okunuyor. "Ç" "C"den, "Ş" "S"den, "İ" "I"dan sonra gelir.
+    // Türk alfabesinde olmayan q, w ve x, "Web" gibi adlar için Latin alfabesindeki yerlerine konuldu.
+    private const string Alphabet = "abcçdefgğhıijklmnoöpqrsştuüvwxyz";
+
+    private static readonly IComparer<string> TurkishComparer = Comparer<string>.Create(CompareTurkish);
+
+    private static int CompareTurkish(string? x, string? y)
+    {
+        var a = Normalize(x ?? "");
+        var b = Normalize(y ?? "");
+
+        for (var i = 0; i < Math.Min(a.Length, b.Length); i++)
+        {
+            var result = Rank(a[i]).CompareTo(Rank(b[i]));
+            if (result != 0)
+                return result;
+        }
+
+        // Biri diğerinin başıysa kısa olan önce: "Su" < "Sular".
+        return a.Length.CompareTo(b.Length);
+    }
+
+    // Harf olmayanlar (boşluk, kesme işareti, rakam) harflerden önce gelir.
+    // Şapkalı harfler şapkasız haliyle aynı sırada sayılır: "Rüzgâr" içindeki â, a gibi.
+    private static int Rank(char c)
+    {
+        c = c switch
+        {
+            'â' => 'a',
+            'î' => 'i',
+            'û' => 'u',
+            _ => c
+        };
+
+        var index = Alphabet.IndexOf(c);
+        return index >= 0 ? 1000 + index : c;
+    }
 }

@@ -12,6 +12,28 @@
     font-weight: 600;
 }
 
+/* Onay kutusu: etiketi kutunun yanında, diğer alanlar gibi üstünde değil. */
+.available-only {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding-left: 0;
+}
+
+    .available-only .form-check-input {
+        width: 1.15rem;
+        height: 1.15rem;
+        margin: 0;
+        float: none;
+    }
+
+    .available-only label {
+        margin-bottom: 0;
+        font-weight: 400;
+        cursor: pointer;
+    }
+
 .result-count {
     margin-bottom: 1rem;
     font-size: 0.875rem;
@@ -33,17 +55,32 @@
     border-radius: 8px;
 }
 
+/* Tablet: arama tek satırda, kategori ve sıralama yan yana, onay kutusu altta. */
 @media (min-width: 576px) {
     .filters {
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1fr 1fr;
     }
+
+        .filters .filter:first-child,
+        .filters .available-only {
+            grid-column: 1 / -1;
+        }
 
     .book-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
+/* Geniş ekran: arama, kategori ve sıralama aynı satırda. */
 @media (min-width: 992px) {
+    .filters {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+
+        .filters .filter:first-child {
+            grid-column: auto;
+        }
+
     .book-grid {
         grid-template-columns: repeat(3, 1fr);
     }
