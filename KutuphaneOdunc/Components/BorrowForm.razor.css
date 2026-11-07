@@ -1,0 +1,63 @@
+.borrow-form {
+    max-width: 520px;
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--renk-kenar);
+    border-radius: 8px;
+}
+
+.form-title {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+    .field label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .field ::deep .form-control:focus {
+        border-color: var(--renk-ana);
+        box-shadow: 0 0 0 0.2rem rgba(30, 77, 140, 0.25);
+    }
+
+    .field ::deep .form-control.invalid {
+        border-color: var(--renk-tehlike);
+        outline: none;
+    }
+
+        .field ::deep .form-control.invalid:focus {
+            box-shadow: 0 0 0 0.2rem rgba(180, 35, 24, 0.25);
+        }
+
+    .field ::deep .validation-message {
+        margin-top: 0.25rem;
+        font-size: 0.85rem;
+        color: var(--renk-tehlike);
+    }
+
+.note {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--renk-yazi-soluk);
+}
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media (max-width: 575.98px) {
+    .buttons .btn {
+        flex: 1 1 100%;
+    }
+}
