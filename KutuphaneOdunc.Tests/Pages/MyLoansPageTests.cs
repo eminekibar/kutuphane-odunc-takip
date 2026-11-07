@@ -149,6 +149,22 @@ public class MyLoansPageTests : BunitContext
     }
 
     [Fact]
+    public void Iade_sonrasi_odak_mesaj_kutusuna_tasinmali()
+    {
+        KayitlariYaz(Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)));
+        var cut = SayfayiAc();
+
+        cut.Find(".current .return-button").Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            var focus = JSInterop.VerifyFocusAsyncInvoke();
+            var reference = (Microsoft.AspNetCore.Components.ElementReference)focus.Arguments[0]!;
+            Assert.Equal(reference.Id, cut.Find(".feedback").GetAttribute("blazor:elementreference"));
+        });
+    }
+
+    [Fact]
     public async Task Sayfa_kapaninca_OnChange_aboneligi_birakilmali()
     {
         var cut = SayfayiAc();
