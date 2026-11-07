@@ -59,7 +59,7 @@ public class BookDetailPageTests : BunitContext
 
         cut.Find(".borrow-button").Click();
 
-        Assert.NotNull(cut.Find("form.borrow-form"));
+        Assert.NotNull(cut.Find(".borrow-form form"));
     }
 
     [Fact]

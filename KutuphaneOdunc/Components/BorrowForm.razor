@@ -1,27 +1,31 @@
-﻿<EditForm Model="model" OnValidSubmit="SubmitAsync" class="borrow-form" novalidate>
-    <DataAnnotationsValidator />
+﻿@* class EditForm'a değil kapsayıcı div'e veriliyor: <form> etiketini EditForm ürettiği için
+   BorrowForm'un scoped CSS niteliğini almıyor, .borrow-form kuralı ona uygulanmıyordu. *@
+<div class="borrow-form">
+    <EditForm Model="model" OnValidSubmit="SubmitAsync" novalidate>
+        <DataAnnotationsValidator />
 
-    <h2 class="form-title">Ödünç alma bilgileri</h2>
+        <h2 class="form-title">Ödünç alma bilgileri</h2>
 
-    <div class="field">
-        <label for="borrow-fullname">Ad soyad</label>
-        <InputText id="borrow-fullname" class="form-control" autocomplete="name" @bind-Value="model.FullName" />
-        <ValidationMessage For="() => model.FullName" />
-    </div>
+        <div class="field">
+            <label for="borrow-fullname">Ad soyad</label>
+            <InputText id="borrow-fullname" class="form-control" autocomplete="name" @bind-Value="model.FullName" />
+            <ValidationMessage For="() => model.FullName" />
+        </div>
 
-    <div class="field">
-        <label for="borrow-email">E-posta</label>
-        <InputText id="borrow-email" type="email" class="form-control" autocomplete="email" @bind-Value="model.Email" />
-        <ValidationMessage For="() => model.Email" />
-    </div>
+        <div class="field">
+            <label for="borrow-email">E-posta</label>
+            <InputText id="borrow-email" type="email" class="form-control" autocomplete="email" @bind-Value="model.Email" />
+            <ValidationMessage For="() => model.Email" />
+        </div>
 
-    <p class="note">Teslim süresi ödünç alma tarihinden itibaren 14 gündür.</p>
+        <p class="note">Teslim süresi ödünç alma tarihinden itibaren 14 gündür.</p>
 
-    <div class="buttons">
-        <button type="submit" class="btn btn-primary">Ödünç Al</button>
-        <button type="button" class="btn btn-outline-secondary" @onclick="OnCancel">Vazgeç</button>
-    </div>
-</EditForm>
+        <div class="buttons">
+            <button type="submit" class="btn btn-primary">Ödünç Al</button>
+            <button type="button" class="btn btn-outline-secondary" @onclick="OnCancel">Vazgeç</button>
+        </div>
+    </EditForm>
+</div>
 
 @code {
     [Parameter]
