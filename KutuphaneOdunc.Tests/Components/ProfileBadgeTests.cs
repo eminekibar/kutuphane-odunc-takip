@@ -1,0 +1,107 @@
+using System.Reflection;
+using Bunit;
+using KutuphaneOdunc.Components;
+using KutuphaneOdunc.Models;
+using KutuphaneOdunc.Services;
+using KutuphaneOdunc.Tests.Fakes;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace KutuphaneOdunc.Tests.Components;
+
+public class ProfileBadgeTests : BunitContext
+{
+    private readonly FakeLocalStorage _storage = new();
+
+    public ProfileBadgeTests()
+    {
+        Services.AddSingleton<ILocalStorageService>(_storage);
+        Services.AddScoped<ProfileService>();
+    }
+
+    private ProfileService Profiles => Services.GetRequiredService<ProfileService>();
+
+    private void ProfilYaz(string adSoyad, string eposta) =>
+        _storage.SetAsync(ProfileService.StorageKey, new UserProfile { FullName = adSoyad, Email = eposta }).Wait();
+
+    [Fact]
+    public void Profil_yokken_Profil_olustur_ve_kisi_ikonu_gorunmeli()
+    {
+        var cut = Render<ProfileBadge>();
+
+        Assert.Equal("Profil oluştur", cut.Find(".name").TextContent);
+        Assert.NotNull(cut.Find(".avatar.no-profile .person-icon"));
+        Assert.Equal("Profil oluştur", cut.Find("a").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void Profil_varken_bas_harfler_ve_ad_gorunmeli()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+
+        var cut = Render<ProfileBadge>();
+
+        Assert.Equal("AY", cut.Find(".avatar").TextContent.Trim());
+        Assert.Empty(cut.FindAll(".person-icon"));
+        Assert.Equal("Ayşe Yılmaz", cut.Find(".name").TextContent);
+        Assert.Equal("Profilim: Ayşe Yılmaz", cut.Find("a").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void Avatar_ekran_okuyucudan_gizlenmeli()
+    {
+        var cut = Render<ProfileBadge>();
+
+        Assert.Equal("true", cut.Find(".avatar").GetAttribute("aria-hidden"));
+    }
+
+    [Fact]
+    public void Link_profile_adresine_gitmeli()
+    {
+        var cut = Render<ProfileBadge>();
+
+        Assert.Equal("profile", cut.Find("a").GetAttribute("href"));
+    }
+
+    [Fact]
+    public void Profil_kaydedilince_bilesen_yeniden_cizilmeli()
+    {
+        var cut = Render<ProfileBadge>();
+        Assert.Equal("Profil oluştur", cut.Find(".name").TextContent);
+
+        // Profil sayfasında kaydedilmiş gibi: bileşenin dışından servis üzerinden.
+        cut.InvokeAsync(() => Profiles.SaveAsync(new UserProfile { FullName = "ilker özgür", Email = "ilker@ornek.com" }));
+
+        cut.WaitForAssertion(() => Assert.Equal("İÖ", cut.Find(".avatar").TextContent.Trim()));
+        Assert.Equal("ilker özgür", cut.Find(".name").TextContent);
+        Assert.Equal("Profilim: ilker özgür", cut.Find("a").GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void Profil_silinince_Profil_olustur_a_donmeli()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+        var cut = Render<ProfileBadge>();
+
+        cut.InvokeAsync(() => Profiles.ClearAsync());
+
+        cut.WaitForAssertion(() => Assert.Equal("Profil oluştur", cut.Find(".name").TextContent));
+        Assert.NotNull(cut.Find(".person-icon"));
+    }
+
+    [Fact]
+    public async Task Bilesen_kaldirilinca_OnChange_aboneligi_birakilmali()
+    {
+        Render<ProfileBadge>();
+        Assert.NotNull(AboneListesi());
+
+        await DisposeComponentsAsync();
+
+        Assert.Null(AboneListesi());
+    }
+
+    // OnChange event'inin arkasındaki alan: abone yoksa null (#16'daki yöntem).
+    private Delegate? AboneListesi() =>
+        (Delegate?)typeof(ProfileService)
+            .GetField(nameof(ProfileService.OnChange), BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(Profiles);
+}

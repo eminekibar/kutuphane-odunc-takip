@@ -1,0 +1,39 @@
+@implements IDisposable
+@inject ProfileService Profiles
+
+@* NavLink'in ürettiği <a> bu bileşenin scoped CSS niteliğini almıyor; stil kapsayıcı div üzerinden ::deep ile veriliyor. *@
+<div class="profile-badge">
+    <NavLink href="profile" aria-label="@Label">
+        <span class="avatar @(Profile is null ? "no-profile" : null)" aria-hidden="true">
+            @if (Profile is null)
+            {
+                <span class="person-icon"></span>
+            }
+            else
+            {
+                @Profile.Initials
+            }
+        </span>
+        <span class="name">@(Profile?.FullName ?? "Profil oluştur")</span>
+    </NavLink>
+</div>
+
+@code {
+    private UserProfile? Profile => Profiles.Profile;
+
+    private string Label => Profile is null ? "Profil oluştur" : $"Profilim: {Profile.FullName}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Profiles.OnChange += HandleProfileChanged;
+        await Profiles.InitializeAsync();
+    }
+
+    // Profil sayfasında kaydedilince ya da silinince menüdeki alan da güncellensin.
+    private void HandleProfileChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Profiles.OnChange -= HandleProfileChanged;
+    }
+}
