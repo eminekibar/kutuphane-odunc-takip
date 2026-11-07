@@ -50,7 +50,8 @@ public class BonusSenaryoTestleri : E2ETest
             await Expect(Page.Locator(".feedback")).ToHaveTextAsync("Profiliniz kaydedildi.");
             await Expect(ProfilAlani.Locator(".avatar")).ToHaveTextAsync("AY");
             await Expect(ProfilAlani.Locator(".name")).ToHaveTextAsync(Ad);
-            await Expect(ProfilAlani.Locator("a")).ToHaveAttributeAsync("aria-label", $"Profilim: {Ad}");
+            // Okunan ad aria-label'dan değil linkin içeriğinden geliyor (#67); tarayıcının hesapladığı ad kontrol ediliyor.
+            await Expect(ProfilAlani.Locator("a")).ToHaveAccessibleNameAsync($"Profilim: {Ad}");
         });
 
         await Adim("2. Kitap ödünç al → form profilden dolu, başarı bildirimi, rozet 1", async () =>
@@ -147,7 +148,7 @@ public class BonusSenaryoTestleri : E2ETest
 
             await Expect(Page.Locator(".feedback")).ToHaveTextAsync("Profiliniz silindi.");
             await Expect(ProfilAlani.Locator(".name")).ToHaveTextAsync("Profil oluştur");
-            await Expect(ProfilAlani.Locator("a")).ToHaveAttributeAsync("aria-label", "Profil oluştur");
+            await Expect(ProfilAlani.Locator("a")).ToHaveAccessibleNameAsync("Profil oluştur");
 
             await FormuAcAsync("B004");
             await Expect(Page.Locator(".profile-hint")).ToBeVisibleAsync();
