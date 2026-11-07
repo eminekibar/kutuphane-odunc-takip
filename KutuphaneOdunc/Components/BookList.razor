@@ -18,9 +18,13 @@
         <label for="book-sort">Sıralama</label>
         <select id="book-sort" class="form-select" @bind="sortOrder">
             <option value="@SortTitle">Ada göre (A → Z)</option>
+            <option value="@SortTitleDesc">Ada göre (Z → A)</option>
             <option value="@SortAuthor">Yazara göre (A → Z)</option>
+            <option value="@SortAuthorDesc">Yazara göre (Z → A)</option>
             <option value="@SortYear">Basım yılına göre (yeniden eskiye)</option>
+            <option value="@SortYearAsc">Basım yılına göre (eskiden yeniye)</option>
             <option value="@SortAvailable">Mevcut kopyaya göre (çoktan aza)</option>
+            <option value="@SortAvailableAsc">Mevcut kopyaya göre (azdan çoğa)</option>
         </select>
     </div>
     <div class="filter available-only form-check">
@@ -53,9 +57,13 @@ else
     public EventCallback<Book> OnBookSelected { get; set; }
 
     private const string SortTitle = "title";
+    private const string SortTitleDesc = "title-desc";
     private const string SortAuthor = "author";
+    private const string SortAuthorDesc = "author-desc";
     private const string SortYear = "year";
+    private const string SortYearAsc = "year-asc";
     private const string SortAvailable = "available";
+    private const string SortAvailableAsc = "available-asc";
 
     private string searchText = "";
     private string selectedCategory = "";
@@ -75,9 +83,13 @@ else
 
             var sorted = sortOrder switch
             {
+                SortTitleDesc => books.OrderByDescending(b => b.Title, TurkishComparer),
                 SortAuthor => books.OrderBy(b => b.Author, TurkishComparer),
+                SortAuthorDesc => books.OrderByDescending(b => b.Author, TurkishComparer),
                 SortYear => books.OrderByDescending(b => b.PublicationYear),
+                SortYearAsc => books.OrderBy(b => b.PublicationYear),
                 SortAvailable => books.OrderByDescending(b => b.AvailableCopies),
+                SortAvailableAsc => books.OrderBy(b => b.AvailableCopies),
                 _ => books.OrderBy(b => b.Title, TurkishComparer)
             };
 

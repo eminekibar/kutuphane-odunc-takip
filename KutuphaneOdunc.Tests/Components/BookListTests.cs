@@ -139,6 +139,11 @@ public class BookListTests : BunitContext
     [InlineData("year", "Web Uygulamalarında Bileşen Mimarisi", "Yazılım Tasarımına Giriş", "İstanbul'da Son Vapur", "Sessiz Kasaba")]
     // İstanbul'da ve Yazılım'ın ikisinde de 3 kopya var: eşitlikte ada göre.
     [InlineData("available", "İstanbul'da Son Vapur", "Yazılım Tasarımına Giriş", "Web Uygulamalarında Bileşen Mimarisi", "Sessiz Kasaba")]
+    // Ters yönler. Eşitlikte yine ada göre A → Z.
+    [InlineData("title-desc", "Yazılım Tasarımına Giriş", "Web Uygulamalarında Bileşen Mimarisi", "Sessiz Kasaba", "İstanbul'da Son Vapur")]
+    [InlineData("author-desc", "İstanbul'da Son Vapur", "Sessiz Kasaba", "Web Uygulamalarında Bileşen Mimarisi", "Yazılım Tasarımına Giriş")]
+    [InlineData("year-asc", "Sessiz Kasaba", "İstanbul'da Son Vapur", "Yazılım Tasarımına Giriş", "Web Uygulamalarında Bileşen Mimarisi")]
+    [InlineData("available-asc", "Sessiz Kasaba", "Web Uygulamalarında Bileşen Mimarisi", "İstanbul'da Son Vapur", "Yazılım Tasarımına Giriş")]
     public void Her_siralama_secenegi_dogru_sirayi_vermeli(string secenek, params string[] beklenen)
     {
         var cut = RenderList();
