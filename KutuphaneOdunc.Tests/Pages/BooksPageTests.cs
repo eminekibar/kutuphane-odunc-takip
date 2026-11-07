@@ -73,7 +73,8 @@ public class BooksPageTests : BunitContext
         var cut = Render<Books>();
         cut.WaitForAssertion(() => Assert.Equal(2, cut.FindAll(".book-card").Count));
 
-        cut.FindAll(".book-card")[0].Click();
+        // Liste ada göre sıralı geldiği için kart sırasıyla değil adıyla bulunuyor (#49).
+        cut.FindAll(".book-card").Single(k => k.QuerySelector(".title")!.TextContent == "Yazılım Tasarımına Giriş").Click();
 
         Assert.EndsWith("/books/B001", navigation.Uri);
     }

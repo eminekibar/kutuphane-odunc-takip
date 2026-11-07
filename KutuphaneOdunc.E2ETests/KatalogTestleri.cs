@@ -79,6 +79,26 @@ public class KatalogTestleri : E2ETest
     }
 
     [Fact]
+    public async Task Siralama_ve_sadece_odunc_alinabilir_olanlar_calismali()
+    {
+        await GitAsync("/books");
+        var kartlar = Page.Locator(".book-card .title");
+
+        // Varsayılan: ada göre, Türk alfabesiyle ("Ağ" "Anadolu"dan önce, çünkü ğ n'den önce).
+        await Expect(kartlar.First).ToHaveTextAsync("Ağ Güvenliğinin Temelleri");
+
+        await Page.Locator("#book-sort").SelectOptionAsync("year");
+        await Expect(kartlar.First).ToHaveTextAsync("Web Uygulamalarında Bileşen Mimarisi");   // 2024
+        await Expect(kartlar.Last).ToHaveTextAsync("Sessiz Kasaba");                           // 2016
+
+        // 18 kitaptan 3'ünün mevcut kopyası 0.
+        await Page.Locator("#book-available-only").CheckAsync();
+        await Expect(Page.Locator(".book-card")).ToHaveCountAsync(15);
+        await Expect(Page.Locator(".result-count")).ToHaveTextAsync("15 kitap listeleniyor");
+        await Expect(kartlar.Last).ToHaveTextAsync("Rüzgârın Getirdiği Mektuplar");          // 2017
+    }
+
+    [Fact]
     public async Task Ana_adres_kitaplar_sayfasina_yonlenmeli()
     {
         await GitAsync("/");
