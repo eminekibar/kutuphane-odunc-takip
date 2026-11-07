@@ -1,5 +1,6 @@
 @page "/books/{Id}"
 @inject LibraryState Library
+@inject ProfileService Profiles
 
 <PageTitle>@PageTitleText - Kütüphane Ödünç Takip</PageTitle>
 
@@ -51,7 +52,13 @@ else
 
     @if (showForm)
     {
-        <BorrowForm OnSubmit="BorrowAsync" OnCancel="CloseForm" />
+        @if (Profiles.Profile is null)
+        {
+            <p class="profile-hint">
+                Bilgilerinizin otomatik dolması için <a href="profile">profil oluşturabilirsiniz</a>.
+            </p>
+        }
+        <BorrowForm Initial="ProfileAsForm" OnSubmit="BorrowAsync" OnCancel="CloseForm" />
     }
 }
 
@@ -70,11 +77,17 @@ else
         : loaded ? "Kitap bulunamadı"
         : "Kitap";
 
+    // Profil varsa ödünç formu bu bilgilerle dolu açılır (#41).
+    private BorrowFormModel? ProfileAsForm => Profiles.Profile is { } p
+        ? new BorrowFormModel { FullName = p.FullName, Email = p.Email }
+        : null;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             await Library.InitializeAsync();
+            await Profiles.InitializeAsync();
             loaded = true;
         }
         catch (Exception)

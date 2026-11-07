@@ -15,13 +15,20 @@ public class BookDetailPageTests : BunitContext
         new() { Id = "B002", Title = "Araştırma Yöntemlerine Giriş", Author = "Murat Demir", Category = "Bilim", TotalCopies = 2, AvailableCopies = 0 }
     };
 
+    private readonly FakeLocalStorage _storage = new();
+
     private void ServisleriKaydet(IBookService? bookService = null)
     {
         Services.AddSingleton(bookService ?? new FakeBookService(OrnekKitaplar()));
-        Services.AddSingleton<ILocalStorageService>(new FakeLocalStorage());
+        Services.AddSingleton<ILocalStorageService>(_storage);
         Services.AddSingleton<TimeProvider>(new FixedTimeProvider(new DateTime(2026, 11, 10)));
         Services.AddScoped<LibraryState>();
+        Services.AddScoped<ProfileService>();
     }
+
+    // Sayfa açılmadan önce localStorage'a profil yazar; sayfa açılınca ProfileService bunu yükler.
+    private void ProfilYaz(string adSoyad, string eposta) =>
+        _storage.SetAsync(ProfileService.StorageKey, new UserProfile { FullName = adSoyad, Email = eposta }).Wait();
 
     private IRenderedComponent<BookDetail> SayfayiAc(string id)
     {
@@ -185,6 +192,51 @@ public class BookDetailPageTests : BunitContext
             Assert.Equal(reference.Id, cut.Find(".result").GetAttribute("blazor:elementreference"));
         });
         Assert.Equal("-1", cut.Find(".result").GetAttribute("tabindex"));
+    }
+
+    // #41: profilden doldurma
+
+    [Fact]
+    public void Profil_yokken_not_ve_profil_linki_gorunmeli()
+    {
+        ServisleriKaydet();
+        var cut = SayfayiAc("B001");
+
+        cut.Find(".borrow-button").Click();
+
+        Assert.Contains("Bilgilerinizin otomatik dolması için", cut.Find(".profile-hint").TextContent);
+        Assert.Equal("profile", cut.Find(".profile-hint a").GetAttribute("href"));
+        Assert.Equal("", cut.Find("#borrow-fullname").GetAttribute("value") ?? "");
+    }
+
+    [Fact]
+    public void Profil_varken_not_gorunmemeli_ve_form_profille_dolu_acilmali()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+        ServisleriKaydet();
+        var cut = SayfayiAc("B001");
+
+        cut.Find(".borrow-button").Click();
+
+        Assert.Empty(cut.FindAll(".profile-hint"));
+        Assert.Equal("Ayşe Yılmaz", cut.Find("#borrow-fullname").GetAttribute("value"));
+        Assert.Equal("ayse@ornek.com", cut.Find("#borrow-email").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void Profille_dolu_form_dogrudan_gonderilince_kayit_profil_bilgileriyle_olusmali()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+        ServisleriKaydet();
+        var cut = SayfayiAc("B001");
+
+        cut.Find(".borrow-button").Click();
+        cut.Find("form").Submit();
+
+        var library = Services.GetRequiredService<LibraryState>();
+        cut.WaitForAssertion(() => Assert.NotNull(cut.Find(".alert-success")));
+        Assert.Equal("Ayşe Yılmaz", library.Loans.Single().BorrowerName);
+        Assert.Equal("ayse@ornek.com", library.Loans.Single().Email);
     }
 
     private sealed class HataVerenBookService : IBookService
