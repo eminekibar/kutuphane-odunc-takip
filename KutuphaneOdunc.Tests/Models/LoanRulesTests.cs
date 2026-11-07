@@ -108,6 +108,32 @@ public class LoanRulesTests
         Assert.False(LoanRules.CanExtend(NewLoan(isExtended: true), new DateTime(2026, 11, 10)));
     }
 
+    // IsDueSoon
+
+    [Theory]
+    [InlineData(4, false)]
+    [InlineData(3, true)]
+    [InlineData(1, true)]
+    [InlineData(0, true)]
+    public void Teslime_3_gun_ya_da_daha_az_kalinca_yaklasiyor_olmali(int kalanGun, bool beklenen)
+    {
+        Assert.Equal(beklenen, LoanRules.IsDueSoon(NewLoan(), DueDate.AddDays(-kalanGun)));
+    }
+
+    [Fact]
+    public void Gecikmis_kayit_yaklasiyor_sayilmamali()
+    {
+        Assert.False(LoanRules.IsDueSoon(NewLoan(), DueDate.AddDays(1)));
+    }
+
+    [Fact]
+    public void Iade_edilmis_kayit_yaklasiyor_sayilmamali()
+    {
+        var loan = NewLoan(returnedAt: new DateTime(2026, 11, 12));
+
+        Assert.False(LoanRules.IsDueSoon(loan, new DateTime(2026, 11, 14)));
+    }
+
     [Fact]
     public void Suresi_gecmis_kayit_uzatilamaz()
     {

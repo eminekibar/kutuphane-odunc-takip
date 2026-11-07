@@ -125,6 +125,26 @@ public class OduncKayitlariTestleri : E2ETest
     }
 
     [Fact]
+    public async Task Teslimine_2_gun_kalan_kayitta_yaklasiyor_etiketi_gorunmeli()
+    {
+        await OduncAlAsync("B001");
+        await DepolamayiDegistirAsync("""
+            const loans = JSON.parse(localStorage.getItem('kutuphane.loans'));
+            const d = new Date(); d.setDate(d.getDate() + 2);
+            const pad = n => String(n).padStart(2, '0');
+            loans[0].DueDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T00:00:00`;
+            localStorage.setItem('kutuphane.loans', JSON.stringify(loans));
+            """);
+
+        await GitAsync("/my-loans");
+        var kart = KayitKarti(Kitap1);
+
+        await Expect(kart.Locator(".badge-state")).ToHaveTextAsync("Aktif");
+        await Expect(kart.Locator(".badge-due-soon")).ToHaveTextAsync("Teslimi yaklaşıyor");
+        await Expect(kart.Locator(".remaining")).ToHaveTextAsync("2 gün kaldı");
+    }
+
+    [Fact]
     public async Task K8_iade_toplam_kopyayi_asmamali()
     {
         await OduncAlAsync("B001");

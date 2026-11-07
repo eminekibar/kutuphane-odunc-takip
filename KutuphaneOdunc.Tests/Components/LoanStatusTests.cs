@@ -88,6 +88,42 @@ public class LoanStatusTests : BunitContext
         Assert.Equal("Bugün son gün", cut.Find(".remaining").TextContent);
     }
 
+    // Teslimi yaklaşıyor
+
+    [Theory]
+    [InlineData(3, "3 gün kaldı")]
+    [InlineData(1, "1 gün kaldı")]
+    [InlineData(0, "Bugün son gün")]
+    public void Teslimi_yaklasan_kayitta_etiket_ve_kalan_gun_yazisi_gorunmeli(int kalanGun, string beklenen)
+    {
+        var cut = Ciz(OrnekKayit(), DueDate.AddDays(-kalanGun));
+
+        Assert.Equal("Aktif", cut.Find(".badge-state").TextContent);
+        Assert.Equal("Teslimi yaklaşıyor", cut.Find(".badge-due-soon").TextContent);
+        Assert.Contains("due-soon", cut.Find(".loan-status").ClassList);
+        Assert.Equal(beklenen, cut.Find(".remaining").TextContent);
+    }
+
+    [Fact]
+    public void Teslimine_4_gun_kalan_kayitta_yaklasiyor_etiketi_gorunmemeli()
+    {
+        var cut = Ciz(OrnekKayit(), DueDate.AddDays(-4));
+
+        Assert.Empty(cut.FindAll(".badge-due-soon"));
+        Assert.DoesNotContain("due-soon", cut.Find(".loan-status").ClassList);
+        Assert.Equal("4 gün", cut.Find(".remaining").TextContent);
+    }
+
+    [Fact]
+    public void Gecikmis_ve_iade_edilmis_kayitta_yaklasiyor_etiketi_gorunmemeli()
+    {
+        var gecikmis = Ciz(OrnekKayit(), GecikmisGun);
+        var iadeEdilmis = Ciz(OrnekKayit(iadeTarihi: new DateTime(2026, 11, 12)), new DateTime(2026, 11, 14));
+
+        Assert.Empty(gecikmis.FindAll(".badge-due-soon"));
+        Assert.Empty(iadeEdilmis.FindAll(".badge-due-soon"));
+    }
+
     [Fact]
     public void Uzatilmis_kayitta_Uzatildi_etiketi_gorunmeli()
     {

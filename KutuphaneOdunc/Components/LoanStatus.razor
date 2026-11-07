@@ -1,8 +1,12 @@
-<article class="loan-status @StateClass" aria-labelledby="@TitleId">
+<article class="loan-status @StateClass @(IsDueSoon ? "due-soon" : "")" aria-labelledby="@TitleId">
     <header class="head">
         <h3 id="@TitleId" class="title">@BookTitle</h3>
         <div class="badges">
             <span class="badge-state">@StateText</span>
+            @if (IsDueSoon)
+            {
+                <span class="badge-due-soon">Teslimi yaklaşıyor</span>
+            }
             @if (Loan.IsExtended)
             {
                 <span class="badge-extended">Uzatıldı</span>
@@ -68,6 +72,7 @@
     private LoanState State => LoanRules.GetState(Loan, Today);
     private int RemainingDays => LoanRules.RemainingDays(Loan, Today);
     private bool CanExtend => LoanRules.CanExtend(Loan, Today);
+    private bool IsDueSoon => LoanRules.IsDueSoon(Loan, Today);
 
     // Sayfada birden fazla kayıt olacağı için başlık id'si kayıt koduna göre üretilir.
     // Butonlar bu başlığa bağlanır; ekran okuyucu "İade Et" ile birlikte kitabın adını da okur.
@@ -94,6 +99,7 @@
     private string RemainingText =>
         State == LoanState.Overdue ? $"{-RemainingDays} gün gecikti"
         : RemainingDays == 0 ? "Bugün son gün"
+        : IsDueSoon ? $"{RemainingDays} gün kaldı"
         : $"{RemainingDays} gün";
 
     private Task ExtendAsync() => OnExtend.InvokeAsync(Loan.Id);

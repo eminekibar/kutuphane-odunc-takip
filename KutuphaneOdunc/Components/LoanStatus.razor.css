@@ -37,7 +37,8 @@
 }
 
 .badge-state,
-.badge-extended {
+.badge-extended,
+.badge-due-soon {
     display: inline-block;
     padding: 0.125rem 0.625rem;
     font-size: 0.8rem;
@@ -59,6 +60,17 @@
 .returned .badge-state {
     color: var(--renk-yazi-soluk);
     background-color: #EEF0F3;
+}
+
+/* Teslimi yaklaşan kayıt: turuncu etiket ve turuncu kalan gün yazısı. */
+.badge-due-soon {
+    color: var(--renk-uyari);
+    background-color: #FDF1E0;
+}
+
+.due-soon .remaining {
+    font-weight: 600;
+    color: var(--renk-uyari);
 }
 
 .badge-extended {
