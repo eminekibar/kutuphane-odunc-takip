@@ -1,0 +1,111 @@
+.book-card {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    text-align: left;
+    font: inherit;
+    color: var(--renk-yazi);
+    background-color: #FFFFFF;
+    border: 1px solid var(--renk-kenar);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+    .book-card:hover {
+        box-shadow: 0 4px 14px rgba(31, 42, 68, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .book-card:focus-visible {
+        outline: 3px solid var(--renk-ana);
+        outline-offset: 2px;
+    }
+
+.cover {
+    display: block;
+    width: 96px;
+    flex-shrink: 0;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background-color: var(--renk-kenar);
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem 0.875rem;
+}
+
+.title {
+    font-weight: 600;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.author {
+    font-size: 0.9rem;
+    color: var(--renk-yazi-soluk);
+}
+
+.category {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--renk-ana-koyu);
+    background-color: #E8EEF7;
+    border-radius: 999px;
+}
+
+.stock {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.out-of-stock {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--renk-tehlike);
+    background-color: #FDECEA;
+    border-radius: 4px;
+}
+
+@media (min-width: 576px) {
+    .book-card {
+        flex-direction: column;
+    }
+
+    .cover {
+        width: 100%;
+    }
+
+    .info {
+        padding: 0.75rem 0.875rem 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .book-card {
+        transition: none;
+    }
+
+        .book-card:hover {
+            transform: none;
+        }
+}

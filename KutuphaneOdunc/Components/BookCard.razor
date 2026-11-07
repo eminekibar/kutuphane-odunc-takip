@@ -1,0 +1,38 @@
+﻿<button type="button" class="book-card" @onclick="SelectAsync">
+    <img class="cover" src="@CoverSrc" alt="@($"{Book.Title} kitabının kapağı")" @onerror="ShowDefaultCover" />
+    <span class="info">
+        <span class="title">@Book.Title</span>
+        <span class="author">@Book.Author</span>
+        <span class="category">@Book.Category</span>
+        <span class="stock">
+            <span>Mevcut kopya: @Book.AvailableCopies</span>
+            @if (Book.AvailableCopies == 0)
+            {
+                <span class="out-of-stock">Stokta yok</span>
+            }
+        </span>
+    </span>
+</button>
+
+@code {
+    private const string DefaultCover = "images/default.svg";
+
+    [Parameter, EditorRequired]
+    public Book Book { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<Book> OnSelect { get; set; }
+
+    private bool coverFailed;
+
+    private string CoverSrc =>
+        coverFailed || string.IsNullOrWhiteSpace(Book.CoverUrl) ? DefaultCover : Book.CoverUrl;
+
+    // Görsel yüklenemezse (dosya yoksa ya da bozuksa) yedek kapağa geç.
+    private void ShowDefaultCover()
+    {
+        coverFailed = true;
+    }
+
+    private Task SelectAsync() => OnSelect.InvokeAsync(Book);
+}
