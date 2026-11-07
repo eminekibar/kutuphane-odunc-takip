@@ -1,0 +1,62 @@
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    text-decoration: none;
+}
+
+    .back-link:hover,
+    .back-link:focus {
+        text-decoration: underline;
+    }
+
+.loading {
+    padding: 2rem 0;
+    color: var(--renk-yazi-soluk);
+}
+
+.not-found {
+    padding: 2rem 1.25rem;
+    text-align: center;
+    background-color: #FFFFFF;
+    border: 1px dashed var(--renk-kenar);
+    border-radius: 8px;
+}
+
+    .not-found h1 {
+        margin-bottom: 0.5rem;
+        font-size: 1.6rem;
+    }
+
+    .not-found p {
+        margin-bottom: 1rem;
+        color: var(--renk-yazi-soluk);
+    }
+
+.result {
+    max-width: 520px;
+    margin-top: 1.5rem;
+}
+
+.result-title {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.result-facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+    .result-facts dt {
+        font-weight: 600;
+    }
+
+    .result-facts dd {
+        margin: 0;
+    }
+
+.code {
+    font-family: Consolas, "Courier New", monospace;
+}
