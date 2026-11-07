@@ -1,0 +1,92 @@
+<article class="loan-status @StateClass" aria-labelledby="@TitleId">
+    <header class="head">
+        <h3 id="@TitleId" class="title">@BookTitle</h3>
+        <div class="badges">
+            <span class="badge-state">@StateText</span>
+            @if (Loan.IsExtended)
+            {
+                <span class="badge-extended">Uzatıldı</span>
+            }
+        </div>
+    </header>
+
+    <dl class="facts">
+        <dt>Ödünç kodu</dt>
+        <dd class="code">@Loan.Id</dd>
+        <dt>Ödünç tarihi</dt>
+        <dd>@Loan.BorrowDate.ToString(DateFormat)</dd>
+        <dt>Son teslim tarihi</dt>
+        <dd>@Loan.DueDate.ToString(DateFormat)</dd>
+        @if (State == LoanState.Returned)
+        {
+            <dt>İade tarihi</dt>
+            <dd>@Loan.ReturnedAt?.ToString(DateFormat)</dd>
+        }
+        else
+        {
+            <dt>Kalan gün</dt>
+            <dd class="remaining">@RemainingText</dd>
+        }
+    </dl>
+
+    <div class="actions">
+        <button type="button" class="btn btn-outline-primary extend-button" disabled="@(!CanExtend)"
+                aria-describedby="@TitleId" @onclick="ExtendAsync">
+            Süreyi Uzat (+7 gün)
+        </button>
+        <button type="button" class="btn btn-primary return-button" disabled="@(State == LoanState.Returned)"
+                aria-describedby="@TitleId" @onclick="ReturnAsync">
+            İade Et
+        </button>
+    </div>
+</article>
+
+@code {
+    private const string DateFormat = "dd.MM.yyyy";
+
+    [Parameter, EditorRequired]
+    public Loan Loan { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string BookTitle { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public DateTime Today { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnExtend { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnReturn { get; set; }
+
+    private LoanState State => LoanRules.GetState(Loan, Today);
+    private int RemainingDays => LoanRules.RemainingDays(Loan, Today);
+    private bool CanExtend => LoanRules.CanExtend(Loan, Today);
+
+    // Sayfada birden fazla kayıt olacağı için başlık id'si kayıt koduna göre üretilir.
+    // Butonlar bu başlığa bağlanır; ekran okuyucu "İade Et" ile birlikte kitabın adını da okur.
+    private string TitleId => $"loan-{Loan.Id}";
+
+    private string StateClass => State switch
+    {
+        LoanState.Overdue => "overdue",
+        LoanState.Returned => "returned",
+        _ => "active"
+    };
+
+    private string StateText => State switch
+    {
+        LoanState.Overdue => "Gecikmiş",
+        LoanState.Returned => "İade edildi",
+        _ => "Aktif"
+    };
+
+    private string RemainingText =>
+        State == LoanState.Overdue ? $"{-RemainingDays} gün gecikti"
+        : RemainingDays == 0 ? "Bugün son gün"
+        : $"{RemainingDays} gün";
+
+    private Task ExtendAsync() => OnExtend.InvokeAsync(Loan.Id);
+
+    private Task ReturnAsync() => OnReturn.InvokeAsync(Loan.Id);
+}
