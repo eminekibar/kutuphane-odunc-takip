@@ -1,0 +1,13 @@
+h1 {
+    margin-bottom: 0.25rem;
+}
+
+.lead-text {
+    margin-bottom: 1.25rem;
+    color: var(--renk-yazi-soluk);
+}
+
+.loading {
+    padding: 2rem 0;
+    color: var(--renk-yazi-soluk);
+}

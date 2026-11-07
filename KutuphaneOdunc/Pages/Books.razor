@@ -1,0 +1,45 @@
+﻿@page "/books"
+@inject LibraryState Library
+@inject NavigationManager Navigation
+
+<PageTitle>Kitaplar - Kütüphane Ödünç Takip</PageTitle>
+
+<h1>Kitaplar</h1>
+<p class="lead-text">Ödünç almak istediğiniz kitabı seçin.</p>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+else if (books is null)
+{
+    <p class="loading" role="status">Yükleniyor...</p>
+}
+else
+{
+    <BookList Books="books" OnBookSelected="OpenDetails" />
+}
+
+@code {
+    private List<Book>? books;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await Library.InitializeAsync();
+            books = Library.Books.ToList();
+        }
+        catch (Exception)
+        {
+            // books.json okunamadı ya da bozuk (ağ hatası, geçersiz JSON).
+            errorMessage = "Kitap listesi yüklenemedi. Sayfayı yenileyip tekrar deneyin.";
+        }
+    }
+
+    private void OpenDetails(Book book)
+    {
+        Navigation.NavigateTo($"books/{book.Id}");
+    }
+}
