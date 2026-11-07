@@ -27,9 +27,12 @@ else
 
     @if (result is not null)
     {
-        @if (result.Success && result.Loan is not null)
-        {
-            <div class="alert alert-success result" role="status">
+        @* tabindex="-1": kutu Tab sırasına girmez ama koddan odaklanabilir. *@
+        <div @ref="resultBox" tabindex="-1"
+             class="alert @(result.Success ? "alert-success" : "alert-danger") result"
+             role="@(result.Success ? "status" : "alert")">
+            @if (result.Success && result.Loan is not null)
+            {
                 <p class="result-title">Kitap ödünç alındı.</p>
                 <dl class="result-facts">
                     <dt>Ödünç kodu</dt>
@@ -38,12 +41,12 @@ else
                     <dd>@result.Loan.DueDate.ToString("dd.MM.yyyy")</dd>
                 </dl>
                 <a href="my-loans">Ödünç kayıtlarıma git</a>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-danger result" role="alert">@result.Message</div>
-        }
+            }
+            else
+            {
+                @result.Message
+            }
+        </div>
     }
 
     @if (showForm)
@@ -106,5 +109,20 @@ else
     {
         result = await Library.BorrowAsync(book!.Id, form);
         showForm = false;
+        focusResult = true;
+    }
+
+    // Form kapanınca odaklanan eleman ekrandan kalkıyor ve odak sayfanın başına düşüyordu.
+    // Klavye kullanıcısı sonuca ve "Ödünç kayıtlarıma git" linkine doğrudan ulaşsın diye odak sonuca taşınır.
+    private ElementReference resultBox;
+    private bool focusResult;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusResult)
+        {
+            focusResult = false;
+            await resultBox.FocusAsync();
+        }
     }
 }

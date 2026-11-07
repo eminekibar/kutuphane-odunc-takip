@@ -130,7 +130,7 @@ public class BookDetailPageTests : BunitContext
         FormuDoldurVeGonder(cut);
 
         cut.WaitForAssertion(() =>
-            Assert.Equal("Bu kitap için iade edilmemiş bir ödünç kaydınız var.", cut.Find(".alert-danger").TextContent));
+            Assert.Equal("Bu kitap için iade edilmemiş bir ödünç kaydınız var.", cut.Find(".alert-danger").TextContent.Trim()));
         Assert.Empty(cut.FindAll(".alert-success"));
         Assert.Single(library.Loans);
     }
@@ -166,6 +166,25 @@ public class BookDetailPageTests : BunitContext
 
         Assert.Contains("Kitap bilgileri yüklenemedi", cut.Find(".alert-danger").TextContent);
         Assert.Empty(cut.FindAll(".book-details"));
+    }
+
+    [Fact]
+    public void Odunc_sonrasi_odak_sonuc_kutusuna_tasinmali()
+    {
+        ServisleriKaydet();
+        var cut = SayfayiAc("B001");
+
+        cut.Find(".borrow-button").Click();
+        FormuDoldurVeGonder(cut);
+
+        // FocusAsync'in hangi elemana çağrıldığı, elemanın bUnit'in verdiği referans kimliğiyle karşılaştırılıyor.
+        cut.WaitForAssertion(() =>
+        {
+            var focus = JSInterop.VerifyFocusAsyncInvoke();
+            var reference = (Microsoft.AspNetCore.Components.ElementReference)focus.Arguments[0]!;
+            Assert.Equal(reference.Id, cut.Find(".result").GetAttribute("blazor:elementreference"));
+        });
+        Assert.Equal("-1", cut.Find(".result").GetAttribute("tabindex"));
     }
 
     private sealed class HataVerenBookService : IBookService

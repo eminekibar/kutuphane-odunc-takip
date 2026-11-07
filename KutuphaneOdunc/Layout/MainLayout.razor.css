@@ -7,6 +7,8 @@
 
 main {
     flex: 1;
+    /* Flex öğesi varsayılan olarak içeriğinden dar olamaz; geniş içerik sayfayı yatay kaydırıyordu. */
+    min-width: 0;
 }
 
 .sidebar {

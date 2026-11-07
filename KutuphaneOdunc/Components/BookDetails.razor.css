@@ -88,9 +88,10 @@
     color: var(--renk-tehlike);
 }
 
-@media (min-width: 768px) {
+/* 768px'te yan menüyle birlikte kapak ve bilgiler yan yana sığmıyor; bu yüzden 992px. */
+@media (min-width: 992px) {
     .book-details {
-        grid-template-columns: 220px 1fr;
+        grid-template-columns: 220px minmax(0, 1fr);
         gap: 2rem;
         padding: 1.5rem;
     }

@@ -27,7 +27,9 @@ else
 {
     @if (feedback is not null)
     {
-        <div class="alert @(feedback.Success ? "alert-success" : "alert-danger") feedback"
+        @* tabindex="-1": kutu Tab sırasına girmez ama koddan odaklanabilir. *@
+        <div @ref="feedbackBox" tabindex="-1"
+             class="alert @(feedback.Success ? "alert-success" : "alert-danger") feedback"
              role="@(feedback.Success ? "status" : "alert")">
             @feedback.Message
         </div>
@@ -109,11 +111,27 @@ else
     private async Task ExtendAsync(string loanId)
     {
         feedback = await Library.ExtendAsync(loanId);
+        focusFeedback = true;
     }
 
     private async Task ReturnAsync(string loanId)
     {
         feedback = await Library.ReturnAsync(loanId);
+        focusFeedback = true;
+    }
+
+    // İade edilen kart Geçmiş'e taşınıyor, uzatılan kartın butonu pasif oluyor; iki durumda da
+    // odaklanan buton kayboluyor ve odak sayfanın başına düşüyordu. Odak mesaja taşınır.
+    private ElementReference feedbackBox;
+    private bool focusFeedback;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusFeedback)
+        {
+            focusFeedback = false;
+            await feedbackBox.FocusAsync();
+        }
     }
 
     // OnChange başka bir bileşenden de tetiklenebilir; InvokeAsync çizimi Blazor'un kendi akışına alır.
