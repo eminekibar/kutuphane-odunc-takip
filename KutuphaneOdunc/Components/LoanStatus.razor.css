@@ -66,6 +66,14 @@
     background-color: #E8EEF7;
 }
 
+/* Uzun e-posta adresleri dar ekranda kartın dışına taşmasın diye satır kırılabiliyor. */
+.borrower {
+    margin: -0.25rem 0 0.75rem;
+    font-size: 0.95rem;
+    color: var(--renk-yazi-soluk);
+    overflow-wrap: anywhere;
+}
+
 .facts {
     display: grid;
     grid-template-columns: max-content 1fr;

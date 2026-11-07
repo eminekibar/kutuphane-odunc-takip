@@ -10,6 +10,12 @@
         </div>
     </header>
 
+    @* Eski kayıtlarda ad olmayabilir; o zaman satır hiç gösterilmez. *@
+    @if (!string.IsNullOrWhiteSpace(Loan.BorrowerName))
+    {
+        <p class="borrower">@BorrowerText</p>
+    }
+
     <dl class="facts">
         <dt>Ödünç kodu</dt>
         <dd class="code">@Loan.Id</dd>
@@ -66,6 +72,10 @@
     // Sayfada birden fazla kayıt olacağı için başlık id'si kayıt koduna göre üretilir.
     // Butonlar bu başlığa bağlanır; ekran okuyucu "İade Et" ile birlikte kitabın adını da okur.
     private string TitleId => $"loan-{Loan.Id}";
+
+    private string BorrowerText => string.IsNullOrWhiteSpace(Loan.Email)
+        ? $"Ödünç alan: {Loan.BorrowerName}"
+        : $"Ödünç alan: {Loan.BorrowerName} ({Loan.Email})";
 
     private string StateClass => State switch
     {

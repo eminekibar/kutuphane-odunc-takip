@@ -166,6 +166,27 @@ public class LoanStatusTests : BunitContext
         Assert.Equal("LIB-2026-101", gelenKod);
     }
 
+    // Ödünç alan kişi
+
+    [Fact]
+    public void Odunc_alan_kisi_ve_e_posta_gorunmeli()
+    {
+        var cut = Ciz(OrnekKayit(), AktifGun);
+
+        Assert.Equal("Ödünç alan: Ayşe Yılmaz (ayse@ornek.com)", cut.Find(".borrower").TextContent);
+    }
+
+    [Fact]
+    public void Ad_kayitli_degilse_odunc_alan_satiri_gorunmemeli()
+    {
+        var kayit = OrnekKayit();
+        kayit.BorrowerName = "";
+
+        var cut = Ciz(kayit, AktifGun);
+
+        Assert.Empty(cut.FindAll(".borrower"));
+    }
+
     [Fact]
     public void Butonlar_kitap_basligina_baglanmali()
     {

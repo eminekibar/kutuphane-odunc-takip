@@ -28,6 +28,7 @@ public class MyLoansPageTests : BunitContext
         Services.AddSingleton<ILocalStorageService>(_storage);
         Services.AddSingleton<TimeProvider>(_saat);
         Services.AddScoped<LibraryState>();
+        Services.AddScoped<ProfileService>();
     }
 
     private LibraryState Library => Services.GetRequiredService<LibraryState>();
@@ -36,10 +37,16 @@ public class MyLoansPageTests : BunitContext
     private void KayitlariYaz(params Loan[] kayitlar) =>
         _storage.SetAsync(LibraryState.LoansKey, kayitlar.ToList()).Wait();
 
-    private static Loan Kayit(string kod, string kitapId, DateTime teslim, DateTime? iade = null) => new()
+    private void ProfilYaz(string adSoyad, string eposta) =>
+        _storage.SetAsync(ProfileService.StorageKey, new UserProfile { FullName = adSoyad, Email = eposta }).Wait();
+
+    private static Loan Kayit(string kod, string kitapId, DateTime teslim, DateTime? iade = null,
+        string eposta = "ayse@ornek.com") => new()
     {
         Id = kod,
         BookId = kitapId,
+        BorrowerName = "Ayşe Yılmaz",
+        Email = eposta,
         BorrowDate = teslim.AddDays(-14),
         DueDate = teslim,
         ReturnedAt = iade
@@ -162,6 +169,69 @@ public class MyLoansPageTests : BunitContext
             var reference = (Microsoft.AspNetCore.Components.ElementReference)focus.Arguments[0]!;
             Assert.Equal(reference.Id, cut.Find(".feedback").GetAttribute("blazor:elementreference"));
         });
+    }
+
+    // "Sadece benim kayıtlarım" filtresi
+
+    [Fact]
+    public void Profil_yoksa_filtre_gorunmemeli()
+    {
+        KayitlariYaz(Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)));
+
+        var cut = SayfayiAc();
+
+        Assert.Empty(cut.FindAll(".filter"));
+    }
+
+    [Fact]
+    public void Profil_varsa_filtre_gorunmeli_ve_Tum_kayitlar_secili_olmali()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+        KayitlariYaz(
+            Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)),
+            Kayit("LIB-2026-102", "B002", teslim: Bugun.AddDays(3), eposta: "mehmet@ornek.com"));
+
+        var cut = SayfayiAc();
+
+        Assert.Equal("true", cut.Find(".filter-all").GetAttribute("aria-pressed"));
+        Assert.Equal("false", cut.Find(".filter-mine").GetAttribute("aria-pressed"));
+        Assert.Equal(2, cut.FindAll(".loan-status").Count);
+    }
+
+    [Fact]
+    public void Sadece_benim_kayitlarim_profil_e_postasina_gore_suzmeli()
+    {
+        // Profildeki e-posta büyük harfle yazılmış; kayıtlardakiyle yine eşleşmeli.
+        ProfilYaz("Ayşe Yılmaz", "AYSE@ornek.com");
+        KayitlariYaz(
+            Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)),
+            Kayit("LIB-2026-102", "B002", teslim: Bugun.AddDays(3), eposta: "mehmet@ornek.com"),
+            Kayit("LIB-2026-103", "B003", teslim: Bugun.AddDays(-4), iade: Bugun.AddDays(-6), eposta: "Ayse@Ornek.com"));
+        var cut = SayfayiAc();
+
+        cut.Find(".filter-mine").Click();
+
+        Assert.Equal(new[] { "Yazılım Tasarımına Giriş" }, Basliklar(cut, "current"));
+        Assert.Equal(new[] { "Veri Yapıları ve Algoritmalar" }, Basliklar(cut, "history"));
+        Assert.Equal("true", cut.Find(".filter-mine").GetAttribute("aria-pressed"));
+
+        cut.Find(".filter-all").Click();
+
+        Assert.Equal(new[] { "Araştırma Yöntemlerine Giriş", "Yazılım Tasarımına Giriş" }, Basliklar(cut, "current"));
+    }
+
+    [Fact]
+    public void Eslesen_kayit_yoksa_mesaj_gorunmeli()
+    {
+        ProfilYaz("Zeynep Kaya", "zeynep@ornek.com");
+        KayitlariYaz(Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)));
+        var cut = SayfayiAc();
+
+        cut.Find(".filter-mine").Click();
+
+        Assert.Equal("Bu e-postayla alınmış kayıt yok.", cut.Find(".filter-empty").TextContent);
+        Assert.Empty(cut.FindAll(".loan-status"));
+        Assert.NotNull(cut.Find(".filter"));
     }
 
     [Fact]

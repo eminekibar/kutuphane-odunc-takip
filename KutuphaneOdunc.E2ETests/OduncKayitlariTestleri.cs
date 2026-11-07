@@ -101,6 +101,30 @@ public class OduncKayitlariTestleri : E2ETest
     }
 
     [Fact]
+    public async Task Kayitta_odunc_alan_kisi_gorunmeli_ve_profil_e_postasiyla_suzulebilmeli()
+    {
+        await OduncAlAsync("B001");
+        await OduncAlAsync("B003", "Mehmet Demir", "mehmet@ornek.com");
+
+        await GitAsync("/my-loans");
+        await Expect(KayitKarti(Kitap1).Locator(".borrower")).ToHaveTextAsync("Ödünç alan: Ayşe Yılmaz (ayse@ornek.com)");
+        await Expect(KayitKarti(Kitap3).Locator(".borrower")).ToHaveTextAsync("Ödünç alan: Mehmet Demir (mehmet@ornek.com)");
+        await Expect(Page.Locator(".filter")).ToHaveCountAsync(0);
+
+        await DepolamayiDegistirAsync("""
+            localStorage.setItem('kutuphane.profile', JSON.stringify({ FullName: 'Ayşe Yılmaz', Email: 'AYSE@ornek.com' }));
+            """);
+
+        await Expect(Page.Locator(".loan-status")).ToHaveCountAsync(2);
+        await Page.Locator(".filter-mine").ClickAsync();
+        await Expect(Page.Locator(".loan-status")).ToHaveCountAsync(1);
+        await Expect(KayitKarti(Kitap1)).ToBeVisibleAsync();
+
+        await Page.Locator(".filter-all").ClickAsync();
+        await Expect(Page.Locator(".loan-status")).ToHaveCountAsync(2);
+    }
+
+    [Fact]
     public async Task K8_iade_toplam_kopyayi_asmamali()
     {
         await OduncAlAsync("B001");
