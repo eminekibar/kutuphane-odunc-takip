@@ -121,6 +121,13 @@ h1 {
     color: var(--renk-tehlike);
 }
 
+/* "Vazgeç" butonu saydam zeminliydi; gri yazı pembe kutuda 4,1:1 kalıyordu (WCAG AA 4,5:1, #71).
+   Beyaz zeminde 4,7:1. Üstüne gelince Bootstrap zemini griye, yazıyı beyaza çeviriyor; beyaz zemin o an
+   da zorlanırsa yazı görünmez olurdu, bu yüzden :not(:hover). */
+.confirm-no:not(:hover) {
+    background-color: #FFFFFF;
+}
+
 @media (max-width: 575.98px) {
     .buttons .btn {
         flex: 1 1 100%;
