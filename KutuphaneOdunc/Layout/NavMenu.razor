@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@implements IDisposable
+@inject LibraryState Library
+@inject TimeProvider Time
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="books">Kütüphane Ödünç Takip</a>
         <button class="navbar-toggler" title="Menüyü aç/kapat" aria-label="Menüyü aç/kapat"
@@ -18,6 +22,12 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="my-loans">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Ödünç Kayıtlarım
+                @if (OpenCount > 0)
+                {
+                    @* Sayı ekran okuyucuya rozetten değil, yanındaki görünmeyen metinden okunur. *@
+                    <span class="loan-badge @(OverdueCount > 0 ? "overdue" : "")" aria-hidden="true">@OpenCount</span>
+                    <span class="visually-hidden">@BadgeText</span>
+                }
             </NavLink>
         </div>
         @* #39'daki "Profilim" linkinin yerini aldı; masaüstünde menünün en altında, telefonda listenin sonunda. *@
@@ -33,5 +43,40 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    // Rozet: iade edilmemiş kayıt sayısı (aktif + gecikmiş). Menü her sayfada olduğu için
+    // ödünç alma, uzatma ve iade hangi sayfada yapılırsa yapılsın LibraryState.OnChange ile güncellenir.
+    private DateTime Today => Time.GetLocalNow().Date;
+
+    private int OpenCount => Library.Loans.Count(l => l.ReturnedAt is null);
+
+    private int OverdueCount => Library.Loans.Count(l => LoanRules.GetState(l, Today) == LoanState.Overdue);
+
+    private string BadgeText => OverdueCount > 0
+        ? $"({OpenCount} iade edilmemiş kayıt, {OverdueCount} gecikmiş)"
+        : $"({OpenCount} iade edilmemiş kayıt)";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Library.OnChange += HandleStateChanged;
+
+        try
+        {
+            // Yükleme bir kez yapılır; sayfa da aynı çağrıyı yapsa dosya ikinci kez okunmaz.
+            await Library.InitializeAsync();
+        }
+        catch (Exception)
+        {
+            // Yükleme hatasını sayfa kendi mesajıyla gösteriyor; menü rozetsiz kalır.
+        }
+    }
+
+    // OnChange başka bir bileşenden tetikleniyor; InvokeAsync çizimi Blazor'un kendi akışına alır.
+    private void HandleStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Library.OnChange -= HandleStateChanged;
     }
 }
