@@ -1,0 +1,126 @@
+@page "/my-loans"
+@implements IDisposable
+@inject LibraryState Library
+@inject TimeProvider Time
+
+<PageTitle>Ödünç Kayıtlarım - Kütüphane Ödünç Takip</PageTitle>
+
+<h1>Ödünç Kayıtlarım</h1>
+<p class="lead-text">Ödünç aldığınız kitapları buradan uzatabilir ve iade edebilirsiniz.</p>
+
+@if (errorMessage is not null)
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+else if (!loaded)
+{
+    <p class="loading" role="status">Yükleniyor...</p>
+}
+else if (Library.Loans.Count == 0)
+{
+    <div class="empty">
+        <p>Henüz ödünç kaydınız yok.</p>
+        <a class="btn btn-primary" href="books">Kitaplara göz at</a>
+    </div>
+}
+else
+{
+    @if (feedback is not null)
+    {
+        <div class="alert @(feedback.Success ? "alert-success" : "alert-danger") feedback"
+             role="@(feedback.Success ? "status" : "alert")">
+            @feedback.Message
+        </div>
+    }
+
+    <section class="loan-section current" aria-labelledby="current-heading">
+        <h2 id="current-heading">Güncel kayıtlar</h2>
+        @if (CurrentLoans.Count == 0)
+        {
+            <p class="section-empty">Şu an iade etmeniz gereken bir kitap yok. <a href="books">Kitaplara göz atın.</a></p>
+        }
+        else
+        {
+            <ul class="loan-list">
+                @foreach (var loan in CurrentLoans)
+                {
+                    <li @key="loan.Id">
+                        <LoanStatus Loan="loan" BookTitle="@TitleOf(loan)" Today="Today"
+                                    OnExtend="ExtendAsync" OnReturn="ReturnAsync" />
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    @if (PastLoans.Count > 0)
+    {
+        <section class="loan-section history" aria-labelledby="history-heading">
+            <h2 id="history-heading">Geçmiş</h2>
+            <ul class="loan-list">
+                @foreach (var loan in PastLoans)
+                {
+                    <li @key="loan.Id">
+                        <LoanStatus Loan="loan" BookTitle="@TitleOf(loan)" Today="Today" />
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+@code {
+    private bool loaded;
+    private string? errorMessage;
+    private ActionResult? feedback;
+
+    private DateTime Today => Time.GetLocalNow().Date;
+
+    // Teslim tarihi en yakın olan (ve gecikmiş olan) en üstte.
+    private List<Loan> CurrentLoans => Library.Loans
+        .Where(l => l.ReturnedAt is null)
+        .OrderBy(l => l.DueDate)
+        .ToList();
+
+    // En son iade edilen en üstte.
+    private List<Loan> PastLoans => Library.Loans
+        .Where(l => l.ReturnedAt is not null)
+        .OrderByDescending(l => l.ReturnedAt)
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Library.OnChange += HandleStateChanged;
+
+        try
+        {
+            await Library.InitializeAsync();
+            loaded = true;
+        }
+        catch (Exception)
+        {
+            errorMessage = "Ödünç kayıtları yüklenemedi. Sayfayı yenileyip tekrar deneyin.";
+        }
+    }
+
+    private string TitleOf(Loan loan) =>
+        Library.Books.FirstOrDefault(b => b.Id == loan.BookId)?.Title ?? $"Bilinmeyen kitap ({loan.BookId})";
+
+    private async Task ExtendAsync(string loanId)
+    {
+        feedback = await Library.ExtendAsync(loanId);
+    }
+
+    private async Task ReturnAsync(string loanId)
+    {
+        feedback = await Library.ReturnAsync(loanId);
+    }
+
+    // OnChange başka bir bileşenden de tetiklenebilir; InvokeAsync çizimi Blazor'un kendi akışına alır.
+    private void HandleStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        Library.OnChange -= HandleStateChanged;
+    }
+}
