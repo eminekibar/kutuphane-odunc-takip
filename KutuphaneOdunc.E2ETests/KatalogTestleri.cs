@@ -87,6 +87,10 @@ public class KatalogTestleri : E2ETest
         // Varsayılan: ada göre, Türk alfabesiyle ("Ağ" "Anadolu"dan önce, çünkü ğ n'den önce).
         await Expect(kartlar.First).ToHaveTextAsync("Ağ Güvenliğinin Temelleri");
 
+        await Page.Locator("#book-sort").SelectOptionAsync("year-asc");
+        await Expect(kartlar.First).ToHaveTextAsync("Sessiz Kasaba");                           // 2016
+        await Expect(kartlar.Last).ToHaveTextAsync("Web Uygulamalarında Bileşen Mimarisi");    // 2024
+
         await Page.Locator("#book-sort").SelectOptionAsync("year");
         await Expect(kartlar.First).ToHaveTextAsync("Web Uygulamalarında Bileşen Mimarisi");   // 2024
         await Expect(kartlar.Last).ToHaveTextAsync("Sessiz Kasaba");                           // 2016
