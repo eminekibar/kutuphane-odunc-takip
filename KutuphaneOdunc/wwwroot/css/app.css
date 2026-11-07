@@ -1,5 +1,21 @@
+:root {
+    --renk-ana: #1E4D8C;
+    --renk-ana-koyu: #163A69;
+    --renk-yan-menu: #1F2A44;
+    --renk-zemin: #F5F6F8;
+    --renk-yazi: #1F2933;
+    --renk-yazi-soluk: #5F6B7A;
+    --renk-kenar: #DDE1E6;
+    --renk-basari: #1F7A3A;
+    --renk-uyari: #9A5B00;
+    --renk-tehlike: #B42318;
+    --yazi-tipi: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--yazi-tipi);
+    color: var(--renk-yazi);
+    background-color: var(--renk-zemin);
 }
 
 h1:focus {
@@ -7,14 +23,19 @@ h1:focus {
 }
 
 a, .btn-link {
-    color: #0071c1;
+    color: var(--renk-ana);
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: var(--renk-ana);
+    border-color: var(--renk-ana-koyu);
 }
+
+    .btn-primary:hover {
+        background-color: var(--renk-ana-koyu);
+        border-color: var(--renk-ana-koyu);
+    }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
@@ -29,11 +50,11 @@ a, .btn-link {
 }
 
 .invalid {
-    outline: 1px solid red;
+    outline: 1px solid var(--renk-tehlike);
 }
 
 .validation-message {
-    color: red;
+    color: var(--renk-tehlike);
 }
 
 #blazor-error-ui {
@@ -62,7 +83,7 @@ a, .btn-link {
 }
 
     .blazor-error-boundary::after {
-        content: "An error has occurred."
+        content: "Bir hata oluştu."
     }
 
 .loading-progress {
@@ -82,7 +103,7 @@ a, .btn-link {
     }
 
         .loading-progress circle:last-child {
-            stroke: #1b6ec2;
+            stroke: var(--renk-ana);
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
             transition: stroke-dasharray 0.05s ease-in-out;
         }
@@ -95,7 +116,7 @@ a, .btn-link {
 }
 
     .loading-progress-text:after {
-        content: var(--blazor-load-percentage-text, "Loading");
+        content: var(--blazor-load-percentage-text, "Yükleniyor");
     }
 
 code {
