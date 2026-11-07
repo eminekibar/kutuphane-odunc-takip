@@ -179,4 +179,22 @@ public class OduncKayitlariTestleri : E2ETest
         await GitAsync("/books/B001");
         await Expect(Page.Locator(".available")).ToHaveTextAsync("5");
     }
+
+    // #69: özet kutuları telefonda 2+1 diziliyordu.
+    [Fact]
+    public async Task Telefonda_uc_ozet_kutusu_ayni_satirda_olmali()
+    {
+        await OduncAlAsync("B001");
+        await Page.SetViewportSizeAsync(390, 844);
+        await GitAsync("/my-loans");
+
+        var kutular = Page.Locator(".loan-summary .summary-box");
+        await Expect(kutular).ToHaveCountAsync(3);
+
+        var ustler = new List<float>();
+        for (var i = 0; i < 3; i++)
+            ustler.Add((await kutular.Nth(i).BoundingBoxAsync())!.Y);
+
+        Assert.All(ustler, y => Assert.Equal(ustler[0], y));
+    }
 }

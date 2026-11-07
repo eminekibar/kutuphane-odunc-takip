@@ -15,9 +15,10 @@
 .bi {
     display: inline-block;
     position: relative;
+    flex: none;
     width: 1.25rem;
     height: 1.25rem;
-    margin-right: 0.75rem;
+    margin-right: 0.5rem;
     top: -1px;
     background-size: cover;
 }
@@ -43,13 +44,17 @@
         padding-bottom: 1rem;
     }
 
+    /* nowrap: rozet gelince "Ödünç Kayıtlarım" iki satıra bölünmesin (#69). Menü masaüstünde 240 piksel;
+       ikon ile yazı arası 0.75rem kalıyor (ikonun 0.5rem boşluğu + 0.25rem gap), yazı ile rozet arası 0.25rem. */
     .nav-item ::deep a {
         color: #E5E9F0;
         border-radius: 6px;
         height: 3rem;
         display: flex;
         align-items: center;
+        column-gap: 0.25rem;
         line-height: 3rem;
+        white-space: nowrap;
         border-left: 3px solid transparent;
     }
 
@@ -71,6 +76,7 @@
 
 /* Ödünç rozeti: linkin sağ ucunda küçük bir hap. Gecikmiş kayıt varsa kırmızı. */
 .loan-badge {
+    flex: none;
     margin-left: auto;
     min-width: 1.5rem;
     padding: 0 0.45rem;
