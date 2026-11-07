@@ -20,6 +20,24 @@ public class OduncKayitlariTestleri : E2ETest
     }
 
     [Fact]
+    public async Task Ozet_kutulari_kayit_durumlarini_saymali()
+    {
+        await OduncAlAsync("B001");
+        await OduncAlAsync("B005");
+
+        await GitAsync("/my-loans");
+        var ozet = Page.Locator(".loan-summary");
+        await Expect(ozet.Locator(".active .count")).ToHaveTextAsync("2");
+        await Expect(ozet.Locator(".overdue .count")).ToHaveTextAsync("0");
+        await Expect(ozet.Locator(".returned .count")).ToHaveTextAsync("0");
+
+        await KayitKarti(Kitap5).Locator(".return-button").ClickAsync();
+
+        await Expect(ozet.Locator(".active .count")).ToHaveTextAsync("1");
+        await Expect(ozet.Locator(".returned .count")).ToHaveTextAsync("1");
+    }
+
+    [Fact]
     public async Task K10_kayit_bilgileri_ve_aktif_etiketi_gorunmeli()
     {
         var kod = await OduncAlAsync("B001");

@@ -1,0 +1,39 @@
+/* Kutular yan yana; ekran daralıp 7rem'lik kutu sığmayınca alt alta iner. */
+.loan-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 0.75rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+}
+
+.summary-box {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 1rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--renk-kenar);
+    border-radius: 8px;
+}
+
+.count {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.label {
+    color: var(--renk-yazi-soluk);
+}
+
+/* Gecikmiş kayıt varsa kutu kırmızı vurgulu. */
+.summary-box.highlight {
+    background-color: #FDECEA;
+    border-color: var(--renk-tehlike);
+}
+
+    .summary-box.highlight .count,
+    .summary-box.highlight .label {
+        color: var(--renk-tehlike);
+    }

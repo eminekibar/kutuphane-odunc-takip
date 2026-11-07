@@ -99,6 +99,54 @@ public class MyLoansPageTests : BunitContext
         Assert.Empty(cut.FindAll(".history"));
     }
 
+    // Özet kutuları
+
+    private static (string Aktif, string Gecikmis, string Iade) Ozet(IRenderedComponent<MyLoans> cut) =>
+        (cut.Find(".loan-summary .active .count").TextContent,
+         cut.Find(".loan-summary .overdue .count").TextContent,
+         cut.Find(".loan-summary .returned .count").TextContent);
+
+    [Fact]
+    public void Kayit_yokken_ozet_gorunmemeli()
+    {
+        var cut = SayfayiAc();
+
+        Assert.Empty(cut.FindAll(".loan-summary"));
+    }
+
+    [Fact]
+    public void Ozet_kayit_sayilarini_gostermeli_ve_iadeden_sonra_guncellenmeli()
+    {
+        KayitlariYaz(
+            Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)),
+            Kayit("LIB-2026-102", "B002", teslim: Bugun.AddDays(-2)));
+        var cut = SayfayiAc();
+
+        Assert.Equal(("1", "1", "0"), Ozet(cut));
+        Assert.Contains("highlight", cut.Find(".loan-summary .overdue").ClassList);
+
+        // Güncel kayıtların ilki gecikmiş olan B002.
+        cut.Find(".current .return-button").Click();
+
+        cut.WaitForAssertion(() => Assert.Equal(("1", "0", "1"), Ozet(cut)));
+        Assert.DoesNotContain("highlight", cut.Find(".loan-summary .overdue").ClassList);
+    }
+
+    [Fact]
+    public void Ozet_filtre_uygulanmis_listeyi_saymali()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+        KayitlariYaz(
+            Kayit("LIB-2026-101", "B001", teslim: Bugun.AddDays(5)),
+            Kayit("LIB-2026-102", "B002", teslim: Bugun.AddDays(-2), eposta: "mehmet@ornek.com"));
+        var cut = SayfayiAc();
+        Assert.Equal(("1", "1", "0"), Ozet(cut));
+
+        cut.Find(".filter-mine").Click();
+
+        Assert.Equal(("1", "0", "0"), Ozet(cut));
+    }
+
     [Fact]
     public void Iade_sonrasi_kayit_Gecmis_bolumune_gecmeli()
     {
