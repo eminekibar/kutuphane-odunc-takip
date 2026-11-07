@@ -24,6 +24,7 @@ public class BookDetailPageTests : BunitContext
         Services.AddSingleton<TimeProvider>(new FixedTimeProvider(new DateTime(2026, 11, 10)));
         Services.AddScoped<LibraryState>();
         Services.AddScoped<ProfileService>();
+        Services.AddScoped<ToastService>();
     }
 
     // Sayfa açılmadan önce localStorage'a profil yazar; sayfa açılınca ProfileService bunu yükler.
@@ -237,6 +238,23 @@ public class BookDetailPageTests : BunitContext
         cut.WaitForAssertion(() => Assert.NotNull(cut.Find(".alert-success")));
         Assert.Equal("Ayşe Yılmaz", library.Loans.Single().BorrowerName);
         Assert.Equal("ayse@ornek.com", library.Loans.Single().Email);
+    }
+
+    [Fact]
+    public void Odunc_alininca_basari_bildirimi_gosterilmeli()
+    {
+        ServisleriKaydet();
+        var cut = SayfayiAc("B001");
+
+        cut.Find(".borrow-button").Click();
+        FormuDoldurVeGonder(cut);
+
+        var toasts = Services.GetRequiredService<ToastService>();
+        cut.WaitForAssertion(() => Assert.Single(toasts.Messages));
+        Assert.Equal(ToastKind.Success, toasts.Messages[0].Kind);
+        Assert.StartsWith("Kitap ödünç alındı. Ödünç kodunuz: LIB-2026-", toasts.Messages[0].Text);
+        // Sayfa içindeki sonuç kutusu da yerinde duruyor.
+        Assert.NotNull(cut.Find(".result .code"));
     }
 
     private sealed class HataVerenBookService : IBookService

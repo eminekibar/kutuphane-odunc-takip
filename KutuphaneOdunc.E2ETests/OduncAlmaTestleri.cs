@@ -57,6 +57,18 @@ public class OduncAlmaTestleri : E2ETest
     }
 
     [Fact]
+    public async Task Odunc_alininca_bildirim_gorunmeli_ve_kapatilabilmeli()
+    {
+        var kod = await OduncAlAsync("B001");
+
+        var bildirim = Page.Locator(".toast-item.success");
+        await Expect(bildirim).ToContainTextAsync($"Kitap ödünç alındı. Ödünç kodunuz: {kod}");
+
+        await bildirim.Locator(".toast-close").ClickAsync();
+        await Expect(bildirim).ToHaveCountAsync(0);
+    }
+
+    [Fact]
     public async Task K6_son_kopya_alininca_stokta_yok_olmali()
     {
         await OduncAlAsync("B005");

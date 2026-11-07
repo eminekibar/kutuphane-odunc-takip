@@ -1,0 +1,114 @@
+/* Masaüstünde sağ altta, bildirimler alt alta. Boş alan tıklamaları engellemesin diye kapsayıcı tıklanamaz. */
+.toast-host {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1080;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(360px, calc(100vw - 2rem));
+    pointer-events: none;
+}
+
+.toast-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0.5rem 0.75rem 1rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--renk-kenar);
+    border-left: 6px solid var(--renk-ana);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+    animation: toast-in 0.2s ease-out;
+}
+
+/* Renkler: başarı yeşil, hata kırmızı, bilgi lacivert. */
+.toast-item.success {
+    border-left-color: var(--renk-basari);
+}
+
+.toast-item.error {
+    border-left-color: var(--renk-tehlike);
+}
+
+.toast-icon {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    background-color: var(--renk-ana);
+    border-radius: 50%;
+}
+
+.success .toast-icon {
+    background-color: var(--renk-basari);
+}
+
+.error .toast-icon {
+    background-color: var(--renk-tehlike);
+}
+
+.toast-text {
+    flex: 1;
+    margin: 0;
+    padding-top: 0.1rem;
+    overflow-wrap: anywhere;
+}
+
+.toast-close {
+    flex: none;
+    padding: 0 0.375rem;
+    font-size: 1.25rem;
+    line-height: 1.5rem;
+    color: var(--renk-yazi-soluk);
+    background: none;
+    border: 0;
+    border-radius: 4px;
+}
+
+    .toast-close:hover {
+        color: var(--renk-yazi);
+        background-color: #EEF0F3;
+    }
+
+    .toast-close:focus-visible {
+        outline: 3px solid rgba(30, 77, 140, 0.4);
+    }
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Telefonda ekranın altında tam genişlikte. */
+@media (max-width: 575.98px) {
+    .toast-host {
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        padding: 0.5rem;
+    }
+}
+
+/* İşletim sisteminde "hareketi azalt" açıksa kayma animasyonu yok. */
+@media (prefers-reduced-motion: reduce) {
+    .toast-item {
+        animation: none;
+    }
+}

@@ -39,6 +39,16 @@ public class LayoutTests : BunitContext
     }
 
     [Fact]
+    public void Layoutta_bildirim_alani_olmali()
+    {
+        Services.AddScoped<KutuphaneOdunc.Services.ToastService>();
+
+        var cut = Render<MainLayout>();
+
+        Assert.NotNull(cut.Find(".toast-host"));
+    }
+
+    [Fact]
     public void Ana_sayfa_kitaplar_sayfasina_yonlendirmeli()
     {
         var navigation = Services.GetRequiredService<NavigationManager>();

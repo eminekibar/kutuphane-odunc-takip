@@ -15,6 +15,7 @@ public class ProfilePageTests : BunitContext
     {
         Services.AddSingleton<ILocalStorageService>(_storage);
         Services.AddScoped<ProfileService>();
+        Services.AddScoped<ToastService>();
     }
 
     private ProfileService Profiles => Services.GetRequiredService<ProfileService>();
@@ -90,6 +91,35 @@ public class ProfilePageTests : BunitContext
         Assert.Equal("Ayşe Yılmaz", Profiles.Profile!.FullName);
         Assert.Equal("AY", cut.Find(".avatar").TextContent);
         Assert.True(_storage.Items.ContainsKey(ProfileService.StorageKey));
+    }
+
+    [Fact]
+    public void Kaydedince_basari_bildirimi_gosterilmeli()
+    {
+        var cut = SayfayiAc();
+
+        Doldur(cut, "Ayşe Yılmaz", "ayse@ornek.com");
+        cut.Find("form").Submit();
+
+        var toasts = Services.GetRequiredService<ToastService>();
+        cut.WaitForAssertion(() => Assert.Single(toasts.Messages));
+        Assert.Equal(ToastKind.Success, toasts.Messages[0].Kind);
+        Assert.Equal("Profiliniz kaydedildi.", toasts.Messages[0].Text);
+    }
+
+    [Fact]
+    public void Silince_bilgi_bildirimi_gosterilmeli()
+    {
+        ProfilYaz("Ayşe Yılmaz", "ayse@ornek.com");
+        var cut = SayfayiAc();
+        cut.Find(".delete-button").Click();
+
+        cut.Find(".confirm-yes").Click();
+
+        var toasts = Services.GetRequiredService<ToastService>();
+        cut.WaitForAssertion(() => Assert.Single(toasts.Messages));
+        Assert.Equal(ToastKind.Info, toasts.Messages[0].Kind);
+        Assert.Equal("Profiliniz silindi.", toasts.Messages[0].Text);
     }
 
     [Fact]
