@@ -1,0 +1,71 @@
+.profile-badge {
+    padding: 0.75rem 1rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+    /* Menüdeki diğer linklerle aynı görünüm (NavMenu.razor.css). */
+    .profile-badge ::deep a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        color: #E5E9F0;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        border-radius: 6px;
+    }
+
+        .profile-badge ::deep a:hover {
+            color: #FFFFFF;
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .profile-badge ::deep a.active {
+            color: #FFFFFF;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left-color: #FFFFFF;
+        }
+
+        .profile-badge ::deep a:focus-visible {
+            outline: 2px solid #FFFFFF;
+            outline-offset: 2px;
+        }
+
+.avatar {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #FFFFFF;
+    background-color: var(--renk-ana);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+}
+
+    /* Profil yokken: içi boş daire ve kişi ikonu. */
+    /* "empty" değil: sayfalardaki boş liste kutuları .empty sınıfını kullanıyor. */
+    .avatar.no-profile {
+        background-color: transparent;
+        border-style: dashed;
+    }
+
+.person-icon {
+    display: block;
+    width: 1.1rem;
+    height: 1.1rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='5' r='3'/%3E%3Cpath d='M2 14c0-3.3 2.7-5 6-5s6 1.7 6 5z'/%3E%3C/svg%3E");
+    background-size: cover;
+}
+
+/* Uzun adlar menüyü genişletmesin; tam ad aria-label'da ve profil sayfasında. */
+.name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
