@@ -18,7 +18,7 @@
     flex: none;
     width: 1.25rem;
     height: 1.25rem;
-    margin-right: 0.5rem;
+    margin-right: 0.75rem;
     top: -1px;
     background-size: cover;
 }
@@ -44,15 +44,14 @@
         padding-bottom: 1rem;
     }
 
-    /* nowrap: rozet gelince "Ödünç Kayıtlarım" iki satıra bölünmesin (#69). Menü masaüstünde 240 piksel;
-       ikon ile yazı arası 0.75rem kalıyor (ikonun 0.5rem boşluğu + 0.25rem gap), yazı ile rozet arası 0.25rem. */
+    /* nowrap: menü yazıları iki satıra bölünmesin. position: relative: ödünç rozeti linke göre konumlanıyor (#69). */
     .nav-item ::deep a {
+        position: relative;
         color: #E5E9F0;
         border-radius: 6px;
         height: 3rem;
         display: flex;
         align-items: center;
-        column-gap: 0.25rem;
         line-height: 3rem;
         white-space: nowrap;
         border-left: 3px solid transparent;
@@ -74,19 +73,24 @@
             outline-offset: 2px;
         }
 
-/* Ödünç rozeti: linkin sağ ucunda küçük bir hap. Gecikmiş kayıt varsa kırmızı. */
+/* Ödünç rozeti: ikonun sağ üst köşesinde, bildirim sayısı gibi. Yazının yanında durunca menüye sığmıyordu:
+   yazı tipi sistemden geldiği için (Windows'ta Segoe UI, Linux'ta DejaVu Sans) genişlik değişiyor (#69).
+   Sağ kenarı ikonun sağ kenarına sabit; sayı iki haneli olunca sola, ikonun üstüne doğru büyüyor, yazıya değmiyor. */
 .loan-badge {
-    flex: none;
-    margin-left: auto;
-    min-width: 1.5rem;
-    padding: 0 0.45rem;
-    font-size: 0.8rem;
+    position: absolute;
+    top: 0.3rem;
+    right: calc(100% - 2.5rem);
+    min-width: 1.15rem;
+    padding: 0 0.3rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    line-height: 1.5rem;
+    line-height: 1.15rem;
     text-align: center;
     color: var(--renk-ana);
     background-color: #FFFFFF;
     border-radius: 999px;
+    /* Menü renginde ince bir çerçeve: rozet ikondan ayrı görünsün. */
+    box-shadow: 0 0 0 2px var(--renk-yan-menu);
 }
 
     .loan-badge.overdue {

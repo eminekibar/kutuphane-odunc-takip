@@ -29,26 +29,29 @@ public class MenuTestleri : E2ETest
     }
 
     // #69: rozet gelince "Ödünç Kayıtlarım" iki satıra bölünüyordu (masaüstünde menü 240 piksel).
+    // Rozet artık ikonun köşesinde; yazının yerini kaplamıyor. CI'daki Linux yazı tipiyle de kontrol ediliyor.
     [Fact]
-    public async Task Rozetli_menu_linki_tek_satirda_kalmali_ve_rozet_linkin_icinde_olmali()
+    public async Task Rozetli_menu_linki_tek_satirda_kalmali_ve_rozet_yaziya_binmemeli()
     {
         await OduncAlAsync("B001");
         var link = Page.Locator("nav a[href='my-loans']");
         await Expect(Rozet).ToHaveTextAsync("1");
 
         // Yazının kaç satıra yayıldığı: metin düğümünün tarayıcıdaki satır kutularının sayısı.
-        var satir = await link.EvaluateAsync<int>("""
+        // Yazının satır kutuları: kaç satıra yayıldığı ve soldan nerede başladığı.
+        var yazi = await link.EvaluateAsync<float[]>("""
             a => {
                 const metin = [...a.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.includes('Ödünç'));
                 const aralik = document.createRange();
                 aralik.selectNodeContents(metin);
-                return [...aralik.getClientRects()].filter(r => r.width > 0).length;
+                const satirlar = [...aralik.getClientRects()].filter(r => r.width > 0);
+                return [satirlar.length, Math.min(...satirlar.map(r => r.left)), a.getBoundingClientRect().right];
             }
             """);
-        Assert.Equal(1, satir);
+        Assert.Equal(1, yazi[0]);
 
-        var kutu = (await link.BoundingBoxAsync())!;
         var rozet = (await Rozet.BoundingBoxAsync())!;
-        Assert.True(rozet.X + rozet.Width <= kutu.X + kutu.Width, "Rozet linkin dışına taşıyor.");
+        Assert.True(rozet.X + rozet.Width <= yazi[1], "Rozet yazının üstüne biniyor.");
+        Assert.True(rozet.X + rozet.Width <= yazi[2], "Rozet linkin dışına taşıyor.");
     }
 }
